@@ -1,3 +1,4 @@
 # GMS
 
-基于gnet的高性能RPC微服务框架
+基于gnet的高性能Golang RPC微服务框架
+

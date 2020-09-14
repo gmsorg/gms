@@ -13,11 +13,37 @@ import (
 	"github.com/akka/gms/example/user"
 )
 
+var size = 4
+var width = 10
+var capWidth = 16
+
 type gmsConnection struct {
-	conn net.Conn
+	conn    net.Conn
+	bufPool *common.BytePoolCap
 }
 
-func (c *gmsConnection) Call() {
+/**
+创建连接
+*/
+func Dial(address string) (*gmsConnection, error) {
+	var size = 4
+	var width = 512
+	var capWidth = 512
+
+	gmsConn := &gmsConnection{
+		bufPool: common.NewBytePoolCap(size, width, capWidth),
+	}
+
+	conn, err := net.DialTimeout("tcp", address, time.Second*3)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gmsConn.conn = conn
+	return gmsConn, nil
+}
+
+func (gc *gmsConnection) Call() {
 	// Done := c.conn.Go(ctx, servicePath, serviceMethod, args, reply, make(chan *Call, 1)).Done
 	// {"service_name":"UserServiceImpl","method_name":"GetUser"}
 
@@ -37,14 +63,17 @@ func (c *gmsConnection) Call() {
 		log.Fatalln(err)
 	}
 
-	c.conn.Write(b)
+	gc.conn.Write(b)
 
 	// --------------read-----------
 	result := bytes.NewBuffer(nil)
 
-	var buf [512]byte
+	// var buf [512]byte
+
+	buf := gc.bufPool.Get()
+	defer gc.bufPool.Put(buf)
 	for {
-		n, err := c.conn.Read(buf[0:])
+		n, err := gc.conn.Read(buf[0:])
 		result.Write(buf[0:n])
 		if err != nil {
 			if err == io.EOF {
@@ -52,7 +81,7 @@ func (c *gmsConnection) Call() {
 			}
 			return
 		}
-		if n < 512 {
+		if n < gc.bufPool.WidthCap() {
 			break
 		}
 	}
@@ -74,15 +103,4 @@ func (c *gmsConnection) Call() {
 
 	fmt.Println(res)
 
-}
-
-func Dial(address string) (*gmsConnection, error) {
-	gmsConn := &gmsConnection{}
-	conn, err := net.DialTimeout("tcp", address, time.Second*3)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	gmsConn.conn = conn
-	return gmsConn, nil
 }
