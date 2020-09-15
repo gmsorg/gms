@@ -68,7 +68,7 @@ func suitableMethods(reflectType reflect.Type, reportErr bool) map[string]*metho
 		if method.PkgPath != "" {
 			continue
 		}
-		// Method needs four ins: receiver, context.Context, *args, *reply.
+		// Method needs three ins: receiver, context.Context, *args
 		if mtype.NumIn() != 3 {
 			if reportErr {
 				log.Println("methods ", mname, " has wrong number of ins:", mtype.NumIn())

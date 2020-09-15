@@ -7,5 +7,8 @@ type RegisterUserReq struct {
 }
 
 type RegisterUserRes struct {
-	Id int64
+	Id       int64
+	Name     string
+	Barthday string
+	Sex      string
 }
