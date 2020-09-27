@@ -55,11 +55,11 @@ func (gms *gms) RegisterService(rcvr interface{}) error {
 */
 func (gms *gms) Run(port int) error {
 	// 初始化时间处理器
-	gmsEventHandler := &gmsEventHandler{gms: gms}
+	gmsEventHandler := &eventHandler{gms: gms}
 
 	log.Println("GMS service listen on:", port)
 
-	// 启动gnet，设置由 gmsEventHandler 处理请求信息
+	// 启动gnet，设置由 eventHandler 处理请求信息
 	err := gnet.Serve(gmsEventHandler,
 		fmt.Sprintf("tcp://:%d", port),
 		gnet.WithMulticore(true),

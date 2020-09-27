@@ -15,12 +15,12 @@ import (
 	"github.com/akka/gms/common"
 )
 
-type gmsEventHandler struct {
+type eventHandler struct {
 	*gnet.EventServer
 	gms *gms
 }
 
-func (g *gmsEventHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Action) {
+func (g *eventHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Action) {
 
 	br := common.ReqMessage{}
 	err := json.Unmarshal(frame, &br)
@@ -55,7 +55,7 @@ func (g *gmsEventHandler) React(frame []byte, c gnet.Conn) (out []byte, action g
 /**
 执行方法
 */
-func (g *gmsEventHandler) exec(serviceName, methodName string, reqData []byte) (res []byte, err error) {
+func (g *eventHandler) exec(serviceName, methodName string, reqData []byte) (res []byte, err error) {
 	defer func() {
 		if err1 := recover(); err1 != nil {
 			log.Println("recover...")

@@ -19,7 +19,7 @@ func Test_gmsClient_Call(t *testing.T) {
 
 	userServiceClient, err := NewUserServiceClient(conn)
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 500; i++ {
 		begin := time.Now()
 		getUserRes, _ := userServiceClient.RegisterUser(context.Background(), &user.RegisterUserReq{})
 
