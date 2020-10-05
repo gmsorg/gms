@@ -4,11 +4,46 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 	"testing"
 	"time"
 
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/akka/gms/example/user"
 )
+
+func Test_gmsClient_Call_GO(t *testing.T) {
+	s := time.Now()
+	conn, err := Dial("127.0.0.1:8080")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userServiceClient, err := NewUserServiceClient(conn)
+
+	wg := sync.WaitGroup{}
+	wg.Add(20)
+	for i := 0; i < 10; i++ {
+		for i := 0; i < 2; i++ {
+			go func() {
+				begin := time.Now()
+				getUserRes, _ := userServiceClient.RegisterUser(context.Background(), &user.RegisterUserReq{
+					Name: uuid.NewV4().String(),
+				})
+
+				fmt.Println(getUserRes)
+				fmt.Println(time.Since(begin))
+				wg.Done()
+			}()
+
+		}
+	}
+	wg.Wait()
+
+	fmt.Println("==============")
+	fmt.Println(time.Since(s))
+}
 
 func Test_gmsClient_Call(t *testing.T) {
 	s := time.Now()
@@ -19,7 +54,8 @@ func Test_gmsClient_Call(t *testing.T) {
 
 	userServiceClient, err := NewUserServiceClient(conn)
 
-	for i := 0; i < 500; i++ {
+	for i := 0; i < 50; i++ {
+
 		begin := time.Now()
 		getUserRes, _ := userServiceClient.RegisterUser(context.Background(), &user.RegisterUserReq{})
 

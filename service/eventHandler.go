@@ -6,51 +6,69 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"reflect"
 	"runtime"
 
 	"github.com/panjf2000/gnet"
-
-	"github.com/akka/gms/common"
+	"github.com/panjf2000/gnet/pool/goroutine"
 )
 
 type eventHandler struct {
 	*gnet.EventServer
-	gms *gms
+	gms  *gms
+	pool *goroutine.Pool
 }
 
 func (g *eventHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Action) {
+	fmt.Println("---1---")
+	data := append([]byte{}, frame...)
 
-	br := common.ReqMessage{}
-	err := json.Unmarshal(frame, &br)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// Use ants pool to unblock the event-loop.
+	_ = g.pool.Submit(func() {
+		fmt.Println("---3---")
+		// time.Sleep(1 * time.Second)
+		fmt.Println(string(data))
+		c.AsyncWrite(data)
 
-	if len(br.ServiceName) < 1 || len(br.MethodName) < 1 {
-		return
-	}
-
-	// 执行方法
-	out, err = g.exec(br.ServiceName, br.MethodName, br.ReqData)
-
-	resMessage := &common.ResMessage{}
-	if err != nil {
-		resMessage.Code = http.StatusInternalServerError
-		resMessage.Msg = err.Error()
-		b, _ := json.Marshal(resMessage)
-		return b, gnet.Action(0)
-	}
-
-	resMessage.Code = http.StatusOK
-	resMessage.Msg = "success"
-	resMessage.ResData = out
-
-	b, _ := json.Marshal(resMessage)
-	return b, gnet.Action(0)
+	})
+	fmt.Println("--2---")
+	return
 }
+
+// func (g *eventHandler) React(frame []byte, c gnet.Conn) ([]byte, gnet.Action) {
+// 	resMessage := &common.ResMessage{}
+// 	fmt.Println(string(frame))
+// 	br := common.ReqMessage{}
+// 	err := json.Unmarshal(frame, &br)
+// 	if err != nil {
+// 		resMessage.Code = http.StatusOK
+// 		resMessage.Msg = "error"
+// 		b, _ := json.Marshal(resMessage)
+// 		fmt.Println("return error")
+// 		return b, gnet.None
+// 	}
+//
+// 	if len(br.ServiceName) < 1 || len(br.MethodName) < 1 {
+// 		return nil, gnet.None
+// 	}
+//
+// 	// 执行方法
+// 	out, err := g.exec(br.ServiceName, br.MethodName, br.ReqData)
+//
+// 	if err != nil {
+// 		resMessage.Code = http.StatusInternalServerError
+// 		resMessage.Msg = err.Error()
+// 		b, _ := json.Marshal(resMessage)
+// 		return b, gnet.None
+// 	}
+//
+// 	resMessage.Code = http.StatusOK
+// 	resMessage.Msg = "success"
+// 	resMessage.ResData = out
+//
+// 	b, _ := json.Marshal(resMessage)
+// 	return b, gnet.None
+// }
 
 /**
 执行方法

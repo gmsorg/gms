@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/panjf2000/gnet"
+	"github.com/panjf2000/gnet/pool/goroutine"
 
 	"github.com/akka/gms/common"
 )
@@ -54,8 +55,10 @@ func (gms *gms) RegisterService(rcvr interface{}) error {
 启动GMS
 */
 func (gms *gms) Run(port int) error {
+	p := goroutine.Default()
+	defer p.Release()
 	// 初始化时间处理器
-	gmsEventHandler := &eventHandler{gms: gms}
+	gmsEventHandler := &eventHandler{gms: gms, pool: p}
 
 	log.Println("GMS service listen on:", port)
 
@@ -64,6 +67,11 @@ func (gms *gms) Run(port int) error {
 		fmt.Sprintf("tcp://:%d", port),
 		gnet.WithMulticore(true),
 		gnet.WithReusePort(true))
+
+	// err := gnet.Serve(&echoServer{},
+	// 	fmt.Sprintf("tcp://:%d", port),
+	// 	gnet.WithMulticore(true),
+	// 	gnet.WithReusePort(true))
 
 	return err
 }
