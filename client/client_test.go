@@ -3,7 +3,9 @@ package client
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
+	"net"
 	"sync"
 	"testing"
 	"time"
@@ -13,9 +15,49 @@ import (
 	"github.com/akka/gms/example/user"
 )
 
+func Test_Gnet_GO(t *testing.T) {
+	s := time.Now()
+	// conn, _ := Dial("127.0.0.1:9000")
+
+	conn, err := net.DialTimeout("tcp", "127.0.0.1:9000", time.Second*3)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(20)
+	for i := 0; i < 10; i++ {
+		for i := 0; i < 2; i++ {
+			go func() {
+				begin := time.Now()
+				conn.Write([]byte("hello"))
+
+				buf := [512]byte{}
+
+				n, err := conn.Read(buf[0:])
+				fmt.Println(string(buf[:n]))
+				if err != nil {
+					if err == io.EOF {
+						return
+					}
+					return
+				}
+
+				fmt.Println(time.Since(begin))
+				wg.Done()
+			}()
+
+		}
+	}
+	wg.Wait()
+
+	fmt.Println("==============")
+	fmt.Println(time.Since(s))
+}
+
 func Test_gmsClient_Call_GO(t *testing.T) {
 	s := time.Now()
-	conn, err := Dial("127.0.0.1:8080")
+	conn, err := Dial("127.0.0.1:9000")
 	if err != nil {
 		log.Fatal(err)
 	}
