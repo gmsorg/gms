@@ -40,6 +40,7 @@ func (s *server) InitServe() {
 	pool := goroutine.Default()
 	defer pool.Release()
 
+	codec = gnet.NewLengthFieldBasedFrameCodec(encoderConfig, decoderConfig)
 	// 启动gnet
 	s.gmsHandler = &gmsHandler{
 		gmsServer: s,
