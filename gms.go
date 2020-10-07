@@ -34,9 +34,6 @@ func (g *gms) Run() {
 	// 展示Logo
 	common.Show_logo()
 
-	// 调用GMS 服务初始化方法
-	g.server.InitServe()
-
 	// 启动GMS服务
 	g.server.Run()
 }
