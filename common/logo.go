@@ -2,7 +2,7 @@ package common
 
 import "fmt"
 
-func Show_logo() {
+func ShowLogo() {
 	fmt.Println(
 		`       _____   __  __    _____ 
       / ____| |  \/  |  / ____|

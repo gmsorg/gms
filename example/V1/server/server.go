@@ -9,6 +9,6 @@ func main() {
 	gms := gms.NewGms()
 
 	gms.AddRouter("user.Add", user.UserAdd)
-	
+
 	gms.Run()
 }

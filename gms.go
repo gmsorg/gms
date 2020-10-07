@@ -32,7 +32,7 @@ func (g *gms) AddRouter(handlerName string, handlerFunc igms.Controller) {
 */
 func (g *gms) Run() {
 	// 展示Logo
-	common.Show_logo()
+	common.ShowLogo()
 
 	// 启动GMS服务
 	g.server.Run()
