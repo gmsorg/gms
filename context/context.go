@@ -1,13 +1,22 @@
 package context
 
-import "encoding/json"
+import (
+	"context"
+	"encoding/json"
+)
 
 type Context struct {
-	Data []byte
+	ctx        context.Context
+	ReqData    []byte
+	ResultData []byte
+}
+
+func NewContext() IContext {
+	return &Context{}
 }
 
 func (c *Context) Param(param interface{}) error {
-	err := json.Unmarshal(c.Data, param)
+	err := json.Unmarshal(c.ReqData, param)
 	if err != nil {
 		return err
 	}
@@ -15,5 +24,10 @@ func (c *Context) Param(param interface{}) error {
 }
 
 func (c *Context) Result(result interface{}) error {
-	panic("implement me")
+	r, err := json.Marshal(result)
+	if err != nil {
+
+	}
+	c.ResultData = r
+	return nil
 }

@@ -2,18 +2,18 @@ package gms
 
 import (
 	"github.com/akka/gms/common"
-	"github.com/akka/gms/igms"
+	"github.com/akka/gms/context"
 	"github.com/akka/gms/server"
 )
 
 type gms struct {
-	server igms.IServer
+	server server.IServer
 }
 
 /**
 初始化GMS
 */
-func NewGms() igms.IGms {
+func NewGms() server.IGms {
 	gms := gms{
 		server: server.NewServer(),
 	}
@@ -23,7 +23,7 @@ func NewGms() igms.IGms {
 /**
 添加服务路由
 */
-func (g *gms) AddRouter(handlerName string, handlerFunc igms.Controller) {
+func (g *gms) AddRouter(handlerName string, handlerFunc context.Controller) {
 	g.server.AddRouter(handlerName, handlerFunc)
 }
 

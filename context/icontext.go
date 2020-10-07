@@ -1,8 +1,6 @@
-package igms
+package context
 
-import "github.com/akka/gms/context"
-
-type Controller func(c *context.Context) error
+type Controller func(c *Context) error
 
 type IContext interface {
 	// 参数转换
