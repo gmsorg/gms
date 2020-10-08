@@ -7,8 +7,8 @@ import (
 
 type Context struct {
 	ctx        context.Context
-	ReqData    []byte
-	ResultData []byte
+	reqData    []byte
+	resultData []byte
 }
 
 func NewContext() *Context {
@@ -17,8 +17,12 @@ func NewContext() *Context {
 	}
 }
 
+func (c *Context) SetParam(b []byte) {
+	c.reqData = b
+}
+
 func (c *Context) Param(param interface{}) error {
-	err := json.Unmarshal(c.ReqData, param)
+	err := json.Unmarshal(c.reqData, param)
 	if err != nil {
 		return err
 	}
@@ -30,6 +34,10 @@ func (c *Context) Result(result interface{}) error {
 	if err != nil {
 
 	}
-	c.ResultData = r
+	c.resultData = r
 	return nil
+}
+
+func (c *Context) GetResult() ([]byte, error) {
+	return c.resultData, nil
 }

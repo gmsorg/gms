@@ -108,12 +108,27 @@ func (s *server) HandlerMessage(message protocol.Imessage) {
 	fmt.Println(string(message.GetExt()))
 	controller, err := s.GetRouter(string(message.GetExt()))
 	if err != nil {
-		// 回写错误信息
+		// todo 回写错误信息
 		fmt.Println("[HandlerMessage] Router:", message.GetExt(), " not found", err)
 		return
 	}
+
 	context := gmsContext.NewContext()
-	context.Param(message.GetData())
+	context.SetParam(message.GetData())
 	// 调用方法
-	controller(context)
+	err = controller(context)
+	if err != nil {
+		fmt.Println(err)
+		// todo 回写错误信息
+		return
+	}
+
+	resultData, err := context.GetResult()
+	if err != nil {
+		fmt.Println(err)
+		// todo 回写错误信息
+		return
+	}
+	fmt.Println(string(resultData))
+	// todo 回写执行结果
 }
