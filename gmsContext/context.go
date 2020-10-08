@@ -1,4 +1,4 @@
-package context
+package gmsContext
 
 import (
 	"context"
@@ -11,8 +11,10 @@ type Context struct {
 	ResultData []byte
 }
 
-func NewContext() IContext {
-	return &Context{}
+func NewContext() *Context {
+	return &Context{
+		ctx: context.Background(),
+	}
 }
 
 func (c *Context) Param(param interface{}) error {

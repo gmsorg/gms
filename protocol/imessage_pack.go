@@ -1,4 +1,4 @@
-package message
+package protocol
 
 /**
 消息编码、解码

@@ -1,22 +1,25 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/panjf2000/gnet"
 	"github.com/panjf2000/gnet/pool/goroutine"
 
 	"github.com/akka/gms/common"
-	"github.com/akka/gms/context"
+	"github.com/akka/gms/gmsContext"
+	"github.com/akka/gms/protocol"
 )
 
 type server struct {
 	// 整个服务级别的锁
 	sync.RWMutex
 	// 路由Map
-	routerMap map[string]context.Controller
+	routerMap map[string]gmsContext.Controller
 	// gms 服务
 	gmsHandler *gmsHandler
 }
@@ -26,7 +29,7 @@ type server struct {
 */
 func NewServer() IServer {
 	s := server{
-		routerMap: make(map[string]context.Controller),
+		routerMap: make(map[string]gmsContext.Controller),
 	}
 	return &s
 }
@@ -40,13 +43,20 @@ func (s *server) InitServe() {
 	pool := goroutine.Default()
 	defer pool.Release()
 
-	codec = gnet.NewLengthFieldBasedFrameCodec(encoderConfig, decoderConfig)
+	// codec := &protocol.MessagePack{}
 	// 启动gnet
 	s.gmsHandler = &gmsHandler{
 		gmsServer: s,
 		pool:      pool,
+		// codec:     codec,
 	}
-	log.Fatal(gnet.Serve(s.gmsHandler, fmt.Sprintf("tcp://:%v", common.GMS_PORT), gnet.WithMulticore(true)))
+	log.Fatal(gnet.Serve(
+		s.gmsHandler,
+		fmt.Sprintf("tcp://:%v", common.GMS_PORT),
+		gnet.WithMulticore(true),
+		gnet.WithTCPKeepAlive(time.Minute*5), // todo 需要确定是否对长连接有影响
+		// gnet.WithCodec(codec)
+	))
 }
 
 /**
@@ -69,7 +79,7 @@ func (s *server) Stop() {
 /**
 添加路由
 */
-func (s *server) AddRouter(handlerName string, handlerFunc context.Controller) {
+func (s *server) AddRouter(handlerName string, handlerFunc gmsContext.Controller) {
 	s.Lock()
 	defer s.Unlock()
 	if _, ok := s.routerMap[handlerName]; ok {
@@ -77,4 +87,33 @@ func (s *server) AddRouter(handlerName string, handlerFunc context.Controller) {
 		return
 	}
 	s.routerMap[handlerName] = handlerFunc
+}
+
+/**
+获取路由
+*/
+func (s *server) GetRouter(handlerName string) (gmsContext.Controller, error) {
+	s.RLock()
+	defer s.RUnlock()
+	if controller, ok := s.routerMap[handlerName]; ok {
+		return controller, nil
+	}
+	return nil, errors.New("[GetRouter] Router not found")
+}
+
+/**
+处理方法
+*/
+func (s *server) HandlerMessage(message protocol.Imessage) {
+	fmt.Println(string(message.GetExt()))
+	controller, err := s.GetRouter(string(message.GetExt()))
+	if err != nil {
+		// 回写错误信息
+		fmt.Println("[HandlerMessage] Router:", message.GetExt(), " not found", err)
+		return
+	}
+	context := gmsContext.NewContext()
+	context.Param(message.GetData())
+	// 调用方法
+	controller(context)
 }

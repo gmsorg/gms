@@ -1,6 +1,9 @@
 package server
 
-import "github.com/akka/gms/context"
+import (
+	"github.com/akka/gms/gmsContext"
+	"github.com/akka/gms/protocol"
+)
 
 type IServer interface {
 	// 初始化GMS服务
@@ -10,5 +13,9 @@ type IServer interface {
 	// 停止GMS服务
 	Stop()
 	// 注册处理器
-	AddRouter(handlerName string, handlerFunc context.Controller)
+	AddRouter(handlerName string, handlerFunc gmsContext.Controller)
+	// 获取处理器
+	GetRouter(handlerName string) (gmsContext.Controller, error)
+	// 处理消息
+	HandlerMessage(message protocol.Imessage)
 }

@@ -2,7 +2,7 @@ package gms
 
 import (
 	"github.com/akka/gms/common"
-	"github.com/akka/gms/context"
+	"github.com/akka/gms/gmsContext"
 	"github.com/akka/gms/server"
 )
 
@@ -23,7 +23,7 @@ func NewGms() server.IGms {
 /**
 添加服务路由
 */
-func (g *gms) AddRouter(handlerName string, handlerFunc context.Controller) {
+func (g *gms) AddRouter(handlerName string, handlerFunc gmsContext.Controller) {
 	g.server.AddRouter(handlerName, handlerFunc)
 }
 

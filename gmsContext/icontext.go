@@ -1,4 +1,4 @@
-package context
+package gmsContext
 
 type Controller func(c *Context) error
 

@@ -3,16 +3,13 @@ package user
 import (
 	"fmt"
 
-	"github.com/akka/gms/context"
+	"github.com/akka/gms/example/V1/vo"
+	"github.com/akka/gms/gmsContext"
 )
 
-type AddUserReq struct {
-	Name string
-}
-
-func UserAdd(c *context.Context) error {
+func UserAdd(c *gmsContext.Context) error {
 	fmt.Println("call userAdd...")
-	addUserReq := &AddUserReq{}
+	addUserReq := &vo.AddUserReq{}
 	c.Param(addUserReq)
 
 	fmt.Println(addUserReq)

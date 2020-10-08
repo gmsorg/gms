@@ -8,22 +8,31 @@ import (
 	"github.com/panjf2000/gnet"
 	"github.com/panjf2000/gnet/pool/goroutine"
 	"github.com/satori/go.uuid"
+
+	"github.com/akka/gms/protocol"
 )
 
 type gmsHandler struct {
 	*gnet.EventServer
+	codec      gnet.ICodec
 	pool       *goroutine.Pool
 	gnetServer gnet.Server
-	// ctx    context.Context
-	// cancel context.CancelFunc
+	// ctx    gmsContext.Context
+	// cancel gmsContext.CancelFunc
 	gmsServer IServer
 }
 
 func (gh *gmsHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Action) {
 	// Use ants pool to unblock the event-loop.
+	mp := protocol.MessagePack{}
 	err := gh.pool.Submit(func() {
 		// data := append([]byte{}, frame...)
 		// time.Sleep(1 * time.Second)
+		message, err := mp.Decode(frame)
+		if err != nil {
+			fmt.Println(err)
+		}
+		gh.gmsServer.HandlerMessage(message)
 		c.AsyncWrite(frame)
 	})
 
@@ -45,7 +54,7 @@ func (gh *gmsHandler) OnInitComplete(server gnet.Server) (action gnet.Action) {
 gnet 新建连接
 */
 func (gh *gmsHandler) OnOpened(c gnet.Conn) (out []byte, action gnet.Action) {
-	// ctx, _ := context.WithCancel(context.Background())
+	// ctx, _ := gmsContext.WithCancel(gmsContext.Background())
 	connid := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 	ctx := context.WithValue(context.Background(), "connid", connid)
 	fmt.Println("[OnOpened] client: " + connid + " open." + " RemoteAddr:" + c.RemoteAddr().String())
