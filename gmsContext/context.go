@@ -6,14 +6,14 @@ import (
 )
 
 type Context struct {
-	ctx        context.Context
-	reqData    []byte
-	resultData []byte
+	context.Context // todo context 功能待完善（参考gin的context实现）
+	reqData         []byte
+	resultData      []byte
 }
 
 func NewContext() *Context {
 	return &Context{
-		ctx: context.Background(),
+
 	}
 }
 
