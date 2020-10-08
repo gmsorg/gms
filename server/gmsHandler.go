@@ -32,8 +32,15 @@ func (gh *gmsHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 		if err != nil {
 			fmt.Println(err)
 		}
-		gh.gmsServer.HandlerMessage(message)
-		c.AsyncWrite(frame)
+		context, err := gh.gmsServer.HandlerMessage(message)
+		if err != nil {
+			fmt.Println(err)
+		}
+		result, err := context.GetResult()
+		if err != nil {
+			fmt.Println(err)
+		}
+		c.AsyncWrite(result)
 	})
 
 	if err != nil {

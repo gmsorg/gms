@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/akka/gms/example/V1/vo"
@@ -28,6 +30,7 @@ func main() {
 	addUser := vo.AddUserReq{
 		Name: "hello",
 	}
+
 	addUserData, err := json.Marshal(addUser)
 	if err != nil {
 		fmt.Println(err)
@@ -40,10 +43,31 @@ func main() {
 		fmt.Println(err)
 	}
 
-	_, err = conn.Write(encodeMessage)
-	if err != nil {
-		fmt.Println(err)
+	wg := sync.WaitGroup{}
+	wg.Add(100)
+	for i := 0; i < 100; i++ {
+		fmt.Println(i)
+		_, err = conn.Write(encodeMessage)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		buf := [512]byte{}
+
+		n, err := conn.Read(buf[0:])
+		fmt.Println(string(buf[:n]))
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			return
+		}
+
+		// time.Sleep(time.Second)
+		wg.Done()
 	}
+	wg.Wait()
+	select {}
 
 	// conn.Read()
 

@@ -33,6 +33,7 @@ func (c *Context) Result(result interface{}) error {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(len(r))
 	c.resultData = r
 	return nil
 }

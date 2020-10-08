@@ -3,6 +3,8 @@ package user
 import (
 	"fmt"
 
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/akka/gms/example/V1/vo"
 	"github.com/akka/gms/gmsContext"
 )
@@ -17,7 +19,7 @@ func UserAdd(c *gmsContext.Context) error {
 
 	fmt.Println(addUserReq)
 
-	addUserReq.Name = "hahahha"
+	addUserReq.Name = "hahahha" + uuid.NewV4().String()
 	c.Result(addUserReq)
 	return nil
 }

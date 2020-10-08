@@ -17,5 +17,5 @@ type IServer interface {
 	// 获取处理器
 	GetRouter(handlerName string) (gmsContext.Controller, error)
 	// 处理消息
-	HandlerMessage(message protocol.Imessage)
+	HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error)
 }

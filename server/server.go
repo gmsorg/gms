@@ -104,13 +104,12 @@ func (s *server) GetRouter(handlerName string) (gmsContext.Controller, error) {
 /*
 处理方法
 */
-func (s *server) HandlerMessage(message protocol.Imessage) {
+func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error) {
 	fmt.Println(string(message.GetExt()))
 	controller, err := s.GetRouter(string(message.GetExt()))
 	if err != nil {
-		// todo 回写错误信息
 		fmt.Println("[HandlerMessage] Router:", message.GetExt(), " not found", err)
-		return
+		return nil, fmt.Errorf("No Router", err)
 	}
 
 	context := gmsContext.NewContext()
@@ -119,16 +118,17 @@ func (s *server) HandlerMessage(message protocol.Imessage) {
 	err = controller(context)
 	if err != nil {
 		fmt.Println(err)
-		// todo 回写错误信息
-		return
+		return nil, fmt.Errorf(" fail", err)
 	}
 
 	resultData, err := context.GetResult()
 	if err != nil {
 		fmt.Println(err)
 		// todo 回写错误信息
-		return
+		return nil, fmt.Errorf("", err)
 	}
 	fmt.Println(string(resultData))
 	// todo 回写执行结果
+	return context, nil
+
 }
