@@ -3,6 +3,7 @@ package gmsContext
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 )
 
 type Context struct {
@@ -12,9 +13,7 @@ type Context struct {
 }
 
 func NewContext() *Context {
-	return &Context{
-
-	}
+	return &Context{}
 }
 
 func (c *Context) SetParam(b []byte) {
@@ -32,7 +31,7 @@ func (c *Context) Param(param interface{}) error {
 func (c *Context) Result(result interface{}) error {
 	r, err := json.Marshal(result)
 	if err != nil {
-
+		fmt.Println(err)
 	}
 	c.resultData = r
 	return nil

@@ -10,7 +10,7 @@ type gms struct {
 	server server.IServer
 }
 
-/**
+/*
 初始化GMS
 */
 func NewGms() server.IGms {
@@ -20,14 +20,14 @@ func NewGms() server.IGms {
 	return &gms
 }
 
-/**
+/*
 添加服务路由
 */
 func (g *gms) AddRouter(handlerName string, handlerFunc gmsContext.Controller) {
 	g.server.AddRouter(handlerName, handlerFunc)
 }
 
-/**
+/*
 启动GMS
 */
 func (g *gms) Run() {

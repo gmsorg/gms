@@ -42,7 +42,7 @@ func (gh *gmsHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 	return
 }
 
-/**
+/*
 gnet 服务启动成功
 */
 func (gh *gmsHandler) OnInitComplete(server gnet.Server) (action gnet.Action) {
@@ -50,7 +50,7 @@ func (gh *gmsHandler) OnInitComplete(server gnet.Server) (action gnet.Action) {
 	return
 }
 
-/**
+/*
 gnet 新建连接
 */
 func (gh *gmsHandler) OnOpened(c gnet.Conn) (out []byte, action gnet.Action) {
@@ -63,7 +63,7 @@ func (gh *gmsHandler) OnOpened(c gnet.Conn) (out []byte, action gnet.Action) {
 	return
 }
 
-/**
+/*
 gnet 连接断开
 */
 func (gh *gmsHandler) OnClosed(c gnet.Conn, err error) (action gnet.Action) {

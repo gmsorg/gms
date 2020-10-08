@@ -17,7 +17,7 @@ type GmsConnection struct {
 	bufPool *common.BytePoolCap
 }
 
-/**
+/*
 创建连接
 */
 func Dial(address string) (*GmsConnection, error) {

@@ -1,7 +1,7 @@
 package protocol
 
-/**
-请求消息和返回消息体封装
+/*
+Message 请求消息和返回消息体封装
 */
 type Message struct {
 	ExtLen  uint32
@@ -11,8 +11,8 @@ type Message struct {
 	Count   uint32
 }
 
-/**
-初始化消息方法
+/*
+NewMessage 初始化消息方法
 */
 func NewMessage(ext, data []byte) Imessage {
 	return &Message{
@@ -24,6 +24,9 @@ func NewMessage(ext, data []byte) Imessage {
 	}
 }
 
+/*
+SetExtLen 设置扩展信息长度
+*/
 func (m *Message) SetExtLen(extLen uint32) {
 	m.ExtLen = extLen
 }

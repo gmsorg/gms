@@ -7,7 +7,7 @@ import (
 	"github.com/akka/gms/gmsContext"
 )
 
-/**
+/*
 测试方法
 */
 func UserAdd(c *gmsContext.Context) error {

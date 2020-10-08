@@ -5,18 +5,20 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/akka/gms/common"
 )
 
-/**
-消息编码、解码
+/*
+MessagePack 消息编码、解码
 实现gnet.ICodec 接口
 */
 type MessagePack struct {
 	// Message
 }
 
-/**
-消息编码
+/*
+Encode 消息编码
 消息格式
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
@@ -56,15 +58,13 @@ func (m *MessagePack) Encode(message Imessage) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-const Header_Length = 8
-
-/**
-消息解码
+/*
+Decode 消息解码
 消息格式
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) Decode(binaryMessage []byte) (Imessage, error) {
-	header := bytes.NewReader(binaryMessage[:Header_Length])
+	header := bytes.NewReader(binaryMessage[:common.HeaderLength])
 
 	// 只解压head的信息，得到dataLen和msgID
 	msg := &Message{}
@@ -80,7 +80,7 @@ func (m *MessagePack) Decode(binaryMessage []byte) (Imessage, error) {
 	}
 
 	// 截取消息投后的所有内容
-	content := binaryMessage[Header_Length:]
+	content := binaryMessage[common.HeaderLength:]
 	// 获取扩展消息
 	msg.Ext = content[:msg.ExtLen]
 	// 获取消息内容

@@ -24,7 +24,7 @@ type server struct {
 	gmsHandler *gmsHandler
 }
 
-/**
+/*
 初始化GMS服务
 */
 func NewServer() IServer {
@@ -34,7 +34,7 @@ func NewServer() IServer {
 	return &s
 }
 
-/**
+/*
 准备启动服务的资源
 */
 func (s *server) InitServe() {
@@ -52,14 +52,14 @@ func (s *server) InitServe() {
 	}
 	log.Fatal(gnet.Serve(
 		s.gmsHandler,
-		fmt.Sprintf("tcp://:%v", common.GMS_PORT),
+		fmt.Sprintf("tcp://:%v", common.GmsPort),
 		gnet.WithMulticore(true),
 		gnet.WithTCPKeepAlive(time.Minute*5), // todo 需要确定是否对长连接有影响
 		// gnet.WithCodec(codec)
 	))
 }
 
-/**
+/*
 启动服务
 */
 func (s *server) Run() {
@@ -69,14 +69,14 @@ func (s *server) Run() {
 
 }
 
-/**
+/*
 停止服务 回收资源
 */
 func (s *server) Stop() {
 	fmt.Println("[gmsServer] stop")
 }
 
-/**
+/*
 添加路由
 */
 func (s *server) AddRouter(handlerName string, handlerFunc gmsContext.Controller) {
@@ -89,7 +89,7 @@ func (s *server) AddRouter(handlerName string, handlerFunc gmsContext.Controller
 	s.routerMap[handlerName] = handlerFunc
 }
 
-/**
+/*
 获取路由
 */
 func (s *server) GetRouter(handlerName string) (gmsContext.Controller, error) {
@@ -101,7 +101,7 @@ func (s *server) GetRouter(handlerName string) (gmsContext.Controller, error) {
 	return nil, errors.New("[GetRouter] Router not found")
 }
 
-/**
+/*
 处理方法
 */
 func (s *server) HandlerMessage(message protocol.Imessage) {
