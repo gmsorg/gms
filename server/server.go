@@ -10,9 +10,9 @@ import (
 	"github.com/panjf2000/gnet"
 	"github.com/panjf2000/gnet/pool/goroutine"
 
-	"github.com/akka/gms/common"
-	"github.com/akka/gms/gmsContext"
-	"github.com/akka/gms/protocol"
+	"github.com/akkagao/gms/common"
+	"github.com/akkagao/gms/gmsContext"
+	"github.com/akkagao/gms/protocol"
 )
 
 type server struct {

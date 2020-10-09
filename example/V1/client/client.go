@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/akka/gms/example/V1/vo"
-	"github.com/akka/gms/protocol"
+	"github.com/akkagao/gms/example/V1/vo"
+	"github.com/akkagao/gms/protocol"
 )
 
 /*

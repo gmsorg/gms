@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/akka/gms/common"
+	"github.com/akkagao/gms/common"
 )
 
 var size = 4

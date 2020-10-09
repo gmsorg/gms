@@ -9,7 +9,7 @@ import (
 	"github.com/panjf2000/gnet/pool/goroutine"
 	"github.com/satori/go.uuid"
 
-	"github.com/akka/gms/protocol"
+	"github.com/akkagao/gms/protocol"
 )
 
 type gmsHandler struct {

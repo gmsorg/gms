@@ -1,4 +1,4 @@
-module github.com/akka/gms
+module github.com/akkagao/gms
 
 go 1.14
 

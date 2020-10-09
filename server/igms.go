@@ -1,6 +1,6 @@
 package server
 
-import "github.com/akka/gms/gmsContext"
+import "github.com/akkagao/gms/gmsContext"
 
 type IGms interface {
 	// 启动GMS服务

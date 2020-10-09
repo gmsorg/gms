@@ -12,7 +12,7 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/akka/gms/example/user"
+	"github.com/akkagao/gms/example/user"
 )
 
 func Test_Gnet_GO(t *testing.T) {

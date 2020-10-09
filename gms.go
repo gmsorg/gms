@@ -1,9 +1,9 @@
 package gms
 
 import (
-	"github.com/akka/gms/common"
-	"github.com/akka/gms/gmsContext"
-	"github.com/akka/gms/server"
+	"github.com/akkagao/gms/common"
+	"github.com/akkagao/gms/gmsContext"
+	"github.com/akkagao/gms/server"
 )
 
 type gms struct {

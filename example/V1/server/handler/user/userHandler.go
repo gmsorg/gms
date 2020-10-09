@@ -5,8 +5,8 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/akka/gms/example/V1/vo"
-	"github.com/akka/gms/gmsContext"
+	"github.com/akkagao/gms/example/V1/vo"
+	"github.com/akkagao/gms/gmsContext"
 )
 
 /*

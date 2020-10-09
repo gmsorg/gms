@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/akka/gms/gmsContext"
-	"github.com/akka/gms/protocol"
+	"github.com/akkagao/gms/gmsContext"
+	"github.com/akkagao/gms/protocol"
 )
 
 type IServer interface {
