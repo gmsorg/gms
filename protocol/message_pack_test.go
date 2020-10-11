@@ -19,11 +19,12 @@ func TestMessagePack_Decode(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(string(encodeData))
+	fmt.Println("encodeData:", string(encodeData))
 	m, err := mp.Decode(encodeData)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println("GetExtLen:", m.GetExtLen(), "GetDataLen:", m.GetDataLen(),
 		"GetExt:", string(m.GetExt()), "GetData:", string(m.GetData()))
+	fmt.Println("GetCount:", m.GetCount())
 }

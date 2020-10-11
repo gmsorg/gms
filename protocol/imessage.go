@@ -28,4 +28,6 @@ type Imessage interface {
 	SetData(data []byte)
 	// 获取主体数据内容
 	GetData() []byte
+	// 获取消息总长度
+	GetCount() uint32
 }

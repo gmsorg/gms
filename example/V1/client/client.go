@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/akkagao/gms/example/V1/vo"
 	"github.com/akkagao/gms/protocol"
 )
@@ -17,9 +19,11 @@ import (
 */
 func main() {
 
+	start := time.Now()
+
 	fmt.Println("Client Test ... start")
 	// 3秒之后发起测试请求，给服务端开启服务的机会
-	time.Sleep(1 * time.Second)
+	// time.Sleep(1 * time.Second)
 
 	conn, err := net.Dial("tcp", "127.0.0.1:9000")
 	if err != nil {
@@ -27,27 +31,14 @@ func main() {
 		return
 	}
 
-	addUser := vo.AddUserReq{
-		Name: "hello",
-	}
-
-	addUserData, err := json.Marshal(addUser)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	message := protocol.NewMessage([]byte("user.Add"), addUserData)
-	mp := protocol.MessagePack{}
-	encodeMessage, err := mp.Encode(message)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	wg := sync.WaitGroup{}
-	wg.Add(100)
-	for i := 0; i < 100; i++ {
-		fmt.Println(i)
-		_, err = conn.Write(encodeMessage)
+
+	cout := 10000
+	wg.Add(cout)
+	for i := 0; i < cout; i++ {
+		// go func(i int) {
+		// fmt.Println(i)
+		_, err = conn.Write(funcName())
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -65,10 +56,32 @@ func main() {
 
 		// time.Sleep(time.Second)
 		wg.Done()
+		// }(i)
+
 	}
 	wg.Wait()
-	select {}
+	// select {}
 
+	fmt.Println(time.Since(start))
 	// conn.Read()
 
+}
+
+func funcName() []byte {
+	addUser := vo.AddUserReq{
+		Name: "hello" + uuid.NewV4().String(),
+	}
+
+	addUserData, err := json.Marshal(addUser)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	message := protocol.NewMessage([]byte("user.Add"), addUserData)
+	mp := protocol.MessagePack{}
+	encodeMessage, err := mp.Encode(message)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return encodeMessage
 }

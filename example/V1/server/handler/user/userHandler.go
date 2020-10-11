@@ -10,7 +10,7 @@ import (
 )
 
 /*
-测试方法
+UserAdd 测试方法
 */
 func UserAdd(c *gmsContext.Context) error {
 	fmt.Println("call userAdd...")

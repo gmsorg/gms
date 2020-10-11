@@ -26,27 +26,32 @@ func (gh *gmsHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 	// Use ants pool to unblock the event-loop.
 	mp := protocol.MessagePack{}
 	err := gh.pool.Submit(func() {
-		// data := append([]byte{}, frame...)
-		// time.Sleep(1 * time.Second)
-		message, err := mp.Decode(frame)
-		if err != nil {
-			fmt.Println(err)
-		}
-		context, err := gh.gmsServer.HandlerMessage(message)
-		if err != nil {
-			fmt.Println(err)
-		}
-		result, err := context.GetResult()
-		if err != nil {
-			fmt.Println(err)
-		}
-		c.AsyncWrite(result)
+		gh.handle(mp, frame, c)
 	})
 
 	if err != nil {
 		fmt.Println("[React] error:", err)
 	}
 	return
+}
+
+/**
+处理接收到的消息
+*/
+func (gh *gmsHandler) handle(mp protocol.MessagePack, frame []byte, c gnet.Conn) {
+	message, err := mp.Decode(frame)
+	if err != nil {
+		fmt.Println(err)
+	}
+	context, err := gh.gmsServer.HandlerMessage(message)
+	if err != nil {
+		fmt.Println(err)
+	}
+	result, err := context.GetResult()
+	if err != nil {
+		fmt.Println(err)
+	}
+	c.AsyncWrite(result)
 }
 
 /*

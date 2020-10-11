@@ -31,25 +31,25 @@ func (m *MessagePack) Encode(message Imessage) ([]byte, error) {
 	buffer := bytes.NewBuffer(result)
 
 	if err := binary.Write(buffer, binary.BigEndian, message.GetExtLen()); err != nil {
-		s := fmt.Sprintf("[Encode] Pack ExtLen error , %v", err)
+		s := fmt.Sprintf("[Encode] Pack extLen error , %v", err)
 		return nil, errors.New(s)
 	}
 
 	if err := binary.Write(buffer, binary.BigEndian, message.GetDataLen()); err != nil {
-		s := fmt.Sprintf("[Encode] Pack DataLen error , %v", err)
+		s := fmt.Sprintf("[Encode] Pack dataLen error , %v", err)
 		return nil, errors.New(s)
 	}
 
 	if message.GetExtLen() > 0 {
 		if err := binary.Write(buffer, binary.BigEndian, message.GetExt()); err != nil {
-			s := fmt.Sprintf("[Encode] Pack Ext error , %v", err)
+			s := fmt.Sprintf("[Encode] Pack ext error , %v", err)
 			return nil, errors.New(s)
 		}
 	}
 
 	if message.GetDataLen() > 0 {
 		if err := binary.Write(buffer, binary.BigEndian, message.GetData()); err != nil {
-			s := fmt.Sprintf("[Encode] Pack Data error , %v", err)
+			s := fmt.Sprintf("[Encode] Pack data error , %v", err)
 			return nil, errors.New(s)
 		}
 	}
@@ -64,40 +64,33 @@ Decode 消息解码
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) Decode(binaryMessage []byte) (Imessage, error) {
+	fmt.Println("1:binaryMessage:", string(binaryMessage))
 	header := bytes.NewReader(binaryMessage[:common.HeaderLength])
 
 	// 只解压head的信息，得到dataLen和msgID
-	msg := &Message{}
-
+	var extLen, dataLen uint32
 	// 读取扩展信息长度
-	if err := binary.Read(header, binary.BigEndian, &msg.ExtLen); err != nil {
+	if err := binary.Read(header, binary.BigEndian, &extLen); err != nil {
 		return nil, err
 	}
 
 	// 读入消息长度
-	if err := binary.Read(header, binary.BigEndian, &msg.DataLen); err != nil {
+	if err := binary.Read(header, binary.BigEndian, &dataLen); err != nil {
 		return nil, err
 	}
 
+	msg := &Message{
+		extLen:  extLen,
+		dataLen: dataLen,
+		count:   common.HeaderLength + extLen + dataLen,
+	}
+
 	// 截取消息投后的所有内容
-	content := binaryMessage[common.HeaderLength:]
+	content := binaryMessage[common.HeaderLength:msg.GetCount()]
+
 	// 获取扩展消息
-	msg.Ext = content[:msg.ExtLen]
+	msg.SetExt(content[:msg.GetExtLen()])
 	// 获取消息内容
-	msg.Data = content[msg.ExtLen:]
-
-	// extBuff := bytes.NewReader(content[:msg.ExtLen])
-	// contentBuff := bytes.NewReader(content[msg.ExtLen:])
-
-	// // 读取扩展信息
-	// if err := binary.Read(extBuff, binary.BigEndian, msg.Ext); err != nil {
-	// 	return nil, err
-	// }
-	//
-	// if err := binary.Read(contentBuff, binary.BigEndian, msg.Data); err != nil {
-	// 	return nil, err
-	// }
-	// 这里只需要把head的数据拆包出来就可以了，然后再通过head的长度，再从conn读取一次数据
+	msg.SetData(content[msg.GetExtLen():])
 	return msg, nil
-
 }
