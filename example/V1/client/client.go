@@ -33,32 +33,32 @@ func main() {
 
 	wg := sync.WaitGroup{}
 
-	cout := 10
+	cout := 10000
 	wg.Add(cout)
 	for i := 0; i < cout; i++ {
 		// go func(i int) {
-			// fmt.Println(i)
-			_, err = conn.Write(funcName(i))
-			if err != nil {
-				fmt.Println(err)
-			}
+		// fmt.Println(i)
+		_, err = conn.Write(funcName(i))
+		if err != nil {
+			fmt.Println(err)
+		}
 
+		buf := [100]byte{}
 
-			buf := [512]byte{}
+		n, err := conn.Read(buf[0:])
+		fmt.Println(string(buf[:n]))
 
-			n, err := conn.Read(buf[0:])
-			fmt.Println(string(buf[:n]))
-			if err != nil {
-				if err == io.EOF {
-					wg.Done()
-					return
-				}
-				return
+		if err != nil {
+			if err == io.EOF {
 				wg.Done()
+				return
 			}
-
-			// time.Sleep(time.Second)
+			return
 			wg.Done()
+		}
+
+		// time.Sleep(time.Second)
+		wg.Done()
 		// }(i)
 
 	}

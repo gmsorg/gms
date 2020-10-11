@@ -24,7 +24,7 @@ Encode 消息编码
 */
 func (m *MessagePack) Encode(message Imessage) ([]byte, error) {
 
-	fmt.Println(message.GetExtLen(), message.GetDataLen())
+	// fmt.Println(message.GetExtLen(), message.GetDataLen())
 
 	result := make([]byte, 0)
 
@@ -54,7 +54,7 @@ func (m *MessagePack) Encode(message Imessage) ([]byte, error) {
 		}
 	}
 
-	fmt.Println(string(buffer.Bytes()))
+	// fmt.Println(string(buffer.Bytes()))
 	return buffer.Bytes(), nil
 }
 
@@ -64,7 +64,7 @@ Decode 消息解码
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) Decode(binaryMessage []byte) (Imessage, error) {
-	fmt.Println("1:binaryMessage:", string(binaryMessage))
+	// fmt.Println("1:binaryMessage:", string(binaryMessage))
 	header := bytes.NewReader(binaryMessage[:common.HeaderLength])
 
 	// 只解压head的信息，得到dataLen和msgID
