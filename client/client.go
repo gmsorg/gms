@@ -29,7 +29,7 @@ func NewClient(discovery discovery.IDiscovery) (IClient, error) {
 	}
 	server, err := discovery.GetServer()
 	if err != nil {
-		return nil, fmt.Errorf("NewClient error", err)
+		return nil, fmt.Errorf("NewClient error %v", err)
 	}
 	client.selector = selector.NewRandomSelect(server)
 	return client, nil
@@ -44,12 +44,12 @@ func (c *Client) Call(serviceFunc string, request interface{}) (response interfa
 	connection := c.getCachedConnection(serverKey)
 
 	// todo 实现编码
-	codecByte, err := json.Marshal(response)
+	codecByte, err := json.Marshal(request)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	message := protocol.NewMessage([]byte{}, codecByte)
+	message := protocol.NewMessage([]byte(serviceFunc), codecByte)
 	eb, err := c.messagePack.Encode(message)
 	if err != nil {
 		// 错误处理

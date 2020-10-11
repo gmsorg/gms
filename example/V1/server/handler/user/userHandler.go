@@ -1,6 +1,8 @@
 package user
 
 import (
+	"fmt"
+
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/akkagao/gms/example/V1/vo"
@@ -15,7 +17,7 @@ func UserAdd(c *gmsContext.Context) error {
 	addUserReq := &vo.AddUserReq{}
 	c.Param(addUserReq)
 
-	// fmt.Println(addUserReq)
+	fmt.Println(addUserReq)
 
 	addUserReq.OrgName = addUserReq.Name
 	addUserReq.Name = "hahahha" + uuid.NewV4().String()

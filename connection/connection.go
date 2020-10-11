@@ -2,7 +2,9 @@ package connection
 
 import (
 	"errors"
+	"fmt"
 	"net"
+	"time"
 
 	"github.com/akkagao/gms/common"
 )
@@ -20,8 +22,9 @@ func (c *Connection) Send(data []byte) error {
 }
 
 func NewConnection(address string) IConnection {
-	conn, err := net.DialTimeout("tcp", address, common.ConnectTimeout)
+	conn, err := net.DialTimeout("tcp", address, time.Second*common.ConnectTimeout)
 	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
 	return &Connection{
