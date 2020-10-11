@@ -10,6 +10,7 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
+	"github.com/akkagao/gms/common"
 	"github.com/akkagao/gms/example/V1/vo"
 	"github.com/akkagao/gms/protocol"
 )
@@ -31,6 +32,8 @@ func main() {
 		return
 	}
 
+	bb := common.NewBytePoolCap(20, 120, 120)
+
 	wg := sync.WaitGroup{}
 
 	cout := 10000
@@ -43,10 +46,14 @@ func main() {
 			fmt.Println(err)
 		}
 
-		buf := [100]byte{}
+		// buf := [200]byte{}
+
+		buf := bb.Get()
 
 		n, err := conn.Read(buf[0:])
 		fmt.Println(string(buf[:n]))
+
+		bb.Put(buf)
 
 		if err != nil {
 			if err == io.EOF {

@@ -39,18 +39,22 @@ func (gh *gmsHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 处理接收到的消息
 */
 func (gh *gmsHandler) handle(mp protocol.MessagePack, frame []byte, c gnet.Conn) {
+	// 解析收到的二进制消息
 	message, err := mp.Decode(frame)
 	if err != nil {
 		fmt.Println(err)
 	}
+	// 调用用户方法
 	context, err := gh.gmsServer.HandlerMessage(message)
 	if err != nil {
 		fmt.Println(err)
 	}
+	// 获取用户方法返回的结果
 	result, err := context.GetResult()
 	if err != nil {
 		fmt.Println(err)
 	}
+	// 给客户端返回处理结果
 	c.AsyncWrite(result)
 }
 
