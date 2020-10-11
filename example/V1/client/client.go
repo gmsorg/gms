@@ -33,29 +33,32 @@ func main() {
 
 	wg := sync.WaitGroup{}
 
-	cout := 10000
+	cout := 10
 	wg.Add(cout)
 	for i := 0; i < cout; i++ {
 		// go func(i int) {
-		// fmt.Println(i)
-		_, err = conn.Write(funcName())
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		buf := [512]byte{}
-
-		n, err := conn.Read(buf[0:])
-		fmt.Println(string(buf[:n]))
-		if err != nil {
-			if err == io.EOF {
-				return
+			// fmt.Println(i)
+			_, err = conn.Write(funcName(i))
+			if err != nil {
+				fmt.Println(err)
 			}
-			return
-		}
 
-		// time.Sleep(time.Second)
-		wg.Done()
+
+			buf := [512]byte{}
+
+			n, err := conn.Read(buf[0:])
+			fmt.Println(string(buf[:n]))
+			if err != nil {
+				if err == io.EOF {
+					wg.Done()
+					return
+				}
+				return
+				wg.Done()
+			}
+
+			// time.Sleep(time.Second)
+			wg.Done()
 		// }(i)
 
 	}
@@ -67,9 +70,9 @@ func main() {
 
 }
 
-func funcName() []byte {
+func funcName(i int) []byte {
 	addUser := vo.AddUserReq{
-		Name: "hello" + uuid.NewV4().String(),
+		Name: fmt.Sprintf("%v--%v--%v", i, "hello", uuid.NewV4().String()),
 	}
 
 	addUserData, err := json.Marshal(addUser)

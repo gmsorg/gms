@@ -1,5 +1,6 @@
 package vo
 
 type AddUserReq struct {
-	Name string
+	OrgName string
+	Name    string
 }

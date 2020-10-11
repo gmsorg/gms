@@ -19,7 +19,9 @@ func UserAdd(c *gmsContext.Context) error {
 
 	fmt.Println(addUserReq)
 
+	addUserReq.OrgName = addUserReq.Name
 	addUserReq.Name = "hahahha" + uuid.NewV4().String()
+
 	c.Result(addUserReq)
 	return nil
 }

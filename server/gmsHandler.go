@@ -54,6 +54,57 @@ func (gh *gmsHandler) handle(mp protocol.MessagePack, frame []byte, c gnet.Conn)
 	c.AsyncWrite(result)
 }
 
+//
+//
+// /**
+// 处理接收到的消息
+// 处理粘包
+// */
+// func (gh *gmsHandler) handle(mp protocol.MessagePack, frame []byte, c gnet.Conn) {
+//
+// 	ctx := c.Context().(context.Context)
+// 	connid := ctx.Value("connid").(string)
+//
+// 	messageCount := uint32(0)
+// 	data := []byte{}
+// 	for {
+// 		if messageCount == 0 {
+// 			data = frame
+// 		} else if len(data) > int(messageCount) {
+// 			fmt.Println(connid, "========11111==========")
+// 			fmt.Println(connid, len(data), int(messageCount))
+// 			fmt.Println(string(data))
+// 			fmt.Println(connid, "==========111111========")
+// 			data = data[messageCount:]
+// 			fmt.Println(connid, "==========2222========")
+// 			fmt.Println(string(data))
+// 			fmt.Println(connid, "==========22222========")
+// 		} else {
+// 			break
+// 		}
+//
+// 		message, err := mp.Decode(data)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		fmt.Println(connid, "==============data==========")
+// 		fmt.Println(string(message.GetData()))
+// 		fmt.Println(connid, "==============data==========")
+// 		messageCount = message.GetCount()
+//
+// 		context, err := gh.gmsServer.HandlerMessage(message)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		result, err := context.GetResult()
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		c.AsyncWrite(result)
+// 	}
+//
+// }
+
 /*
 gnet 服务启动成功
 */
