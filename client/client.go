@@ -15,7 +15,7 @@ type Client struct {
 	discovery   discovery.IDiscovery
 	selector    selector.ISelector
 	connection  map[string]connection.IConnection
-	messagePack *protocol.MessagePack
+	messagePack protocol.IMessagePack
 }
 
 /*
@@ -25,7 +25,7 @@ func NewClient(discovery discovery.IDiscovery) (IClient, error) {
 	client := &Client{
 		discovery:   discovery,
 		connection:  make(map[string]connection.IConnection),
-		messagePack: &protocol.MessagePack{},
+		messagePack: protocol.NewMessagePack(),
 	}
 	server, err := discovery.GetServer()
 	if err != nil {
@@ -35,10 +35,10 @@ func NewClient(discovery discovery.IDiscovery) (IClient, error) {
 	return client, nil
 }
 
-func (c *Client) Call(serviceFunc string, request interface{}) (response interface{}, err error) {
+func (c *Client) Call(serviceFunc string, request interface{}, response interface{}) error {
 	serverKey := c.selector.Select()
 	if serverKey == "" {
-		return nil, errors.New("can't find server")
+		return errors.New("can't find server")
 	}
 
 	connection := c.getCachedConnection(serverKey)
@@ -55,9 +55,18 @@ func (c *Client) Call(serviceFunc string, request interface{}) (response interfa
 		// 错误处理
 		fmt.Println(err)
 	}
-	connection.Send(eb)
+	err = connection.Send(eb)
+	if err != nil {
+		return err
+	}
 
-	return nil, nil
+	// todo 读取返回结果
+	err = connection.Read(response)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) getCachedConnection(address string) connection.IConnection {
@@ -74,5 +83,6 @@ func (c *Client) generateClient(address string) connection.IConnection {
 }
 
 func (c *Client) Close() {
+	// todo
 	panic("implement me")
 }

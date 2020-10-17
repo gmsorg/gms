@@ -1,5 +1,6 @@
 package connection
 
 type IConnection interface {
-	Send([]byte) error
+	Send(reqData []byte) error
+	Read(response interface{}) error
 }

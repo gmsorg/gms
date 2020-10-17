@@ -17,15 +17,16 @@ type MessagePack struct {
 	// Message
 }
 
+func NewMessagePack() IMessagePack {
+	return &MessagePack{}
+}
+
 /*
 Encode 消息编码
 消息格式
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) Encode(message Imessage) ([]byte, error) {
-
-	// fmt.Println(message.GetExtLen(), message.GetDataLen())
-
 	result := make([]byte, 0)
 
 	buffer := bytes.NewBuffer(result)
@@ -85,7 +86,7 @@ func (m *MessagePack) Decode(binaryMessage []byte) (Imessage, error) {
 		count:   common.HeaderLength + extLen + dataLen,
 	}
 
-	// 截取消息投后的所有内容
+	// 截取消息头后的所有内容
 	content := binaryMessage[common.HeaderLength:msg.GetCount()]
 
 	// 获取扩展消息

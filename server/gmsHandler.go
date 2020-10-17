@@ -3,12 +3,11 @@ package server
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/panjf2000/gnet"
 	"github.com/panjf2000/gnet/pool/goroutine"
-	"github.com/satori/go.uuid"
 
+	"github.com/akkagao/gms/common"
 	"github.com/akkagao/gms/protocol"
 )
 
@@ -122,9 +121,9 @@ gnet 新建连接
 */
 func (gh *gmsHandler) OnOpened(c gnet.Conn) (out []byte, action gnet.Action) {
 	// ctx, _ := gmsContext.WithCancel(gmsContext.Background())
-	connid := strings.Replace(uuid.NewV4().String(), "-", "", -1)
+	connid := common.GenIdentity()
 	ctx := context.WithValue(context.Background(), "connid", connid)
-	fmt.Println("[OnOpened] client: " + connid + " open." + " RemoteAddr:" + c.RemoteAddr().String())
+	fmt.Println(fmt.Sprintf("[OnOpened] client: %v open. RemoteAddr:%v", connid, c.RemoteAddr().String()))
 	fmt.Println("[OnOpened] Conn count:", gh.gnetServer.CountConnections())
 	c.SetContext(ctx)
 	return

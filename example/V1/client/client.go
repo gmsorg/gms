@@ -8,8 +8,6 @@ import (
 	"sync"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
-
 	"github.com/akkagao/gms/common"
 	"github.com/akkagao/gms/example/V1/vo"
 	"github.com/akkagao/gms/protocol"
@@ -19,7 +17,6 @@ import (
 	模拟客户端
 */
 func main() {
-
 	start := time.Now()
 
 	fmt.Println("Client Test ... start")
@@ -32,11 +29,11 @@ func main() {
 		return
 	}
 
-	bb := common.NewBytePoolCap(20, 120, 120)
+	// bb := common.NewBytePoolCap(20, 120, 120)
 
 	wg := sync.WaitGroup{}
 
-	cout := 10000
+	cout := 10
 	wg.Add(cout)
 	for i := 0; i < cout; i++ {
 		// go func(i int) {
@@ -48,12 +45,12 @@ func main() {
 
 		// buf := [200]byte{}
 
-		buf := bb.Get()
+		buf := common.BytePool.Get()
 
 		n, err := conn.Read(buf[0:])
 		fmt.Println(string(buf[:n]))
 
-		bb.Put(buf)
+		common.BytePool.Put(buf)
 
 		if err != nil {
 			if err == io.EOF {
@@ -79,7 +76,7 @@ func main() {
 
 func funcName(i int) []byte {
 	addUser := vo.AddUserReq{
-		Name: fmt.Sprintf("%v--%v--%v", i, "hello", uuid.NewV4().String()),
+		Name: fmt.Sprintf("%v--%v--%v", i, "hello", common.GenIdentity()),
 	}
 
 	addUserData, err := json.Marshal(addUser)
