@@ -27,7 +27,7 @@ func NewClient(discovery discovery.IDiscovery) (IClient, error) {
 		discovery:   discovery,
 		connection:  make(map[string]connection.IConnection),
 		messagePack: protocol.NewMessagePack(),
-		codecType:   codec.JSON,
+		codecType:   codec.Msgpack,
 	}
 	server, err := discovery.GetServer()
 	if err != nil {

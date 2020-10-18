@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/akkagao/gms/client"
+	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/discovery"
 	"github.com/akkagao/gms/example/model"
 )
@@ -21,6 +22,9 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
+	// 设置JSON 序列化器
+	demoClient.SetCodecType(codec.JSON)
 
 	req := &model.AddUserReq{Name: "aaa"}
 	res := &model.AddUserRes{}
