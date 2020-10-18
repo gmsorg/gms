@@ -37,6 +37,14 @@ func NewClient(discovery discovery.IDiscovery) (IClient, error) {
 	return client, nil
 }
 
+func (c *Client) SetCodecType(codecType codec.CodecType) error {
+	if codec := codec.GetCodec(c.codecType); codec == nil {
+		return errors.New("unsupped codecType,only supped['JSON','Msgpack','Gob']")
+	}
+	c.codecType = codecType
+	return nil
+}
+
 func (c *Client) Call(serviceFunc string, request interface{}, response interface{}) error {
 	serverKey := c.selector.Select()
 	if serverKey == "" {
