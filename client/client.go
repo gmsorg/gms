@@ -1,10 +1,10 @@
 package client
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
+	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/connection"
 	"github.com/akkagao/gms/discovery"
 	"github.com/akkagao/gms/protocol"
@@ -16,6 +16,7 @@ type Client struct {
 	selector    selector.ISelector
 	connection  map[string]connection.IConnection
 	messagePack protocol.IMessagePack
+	codecType   codec.CodecType
 }
 
 /*
@@ -26,6 +27,7 @@ func NewClient(discovery discovery.IDiscovery) (IClient, error) {
 		discovery:   discovery,
 		connection:  make(map[string]connection.IConnection),
 		messagePack: protocol.NewMessagePack(),
+		codecType:   codec.JSON,
 	}
 	server, err := discovery.GetServer()
 	if err != nil {
@@ -43,8 +45,9 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 
 	connection := c.getCachedConnection(serverKey)
 
-	// todo 实现编码
-	codecByte, err := json.Marshal(request)
+	codec := codec.GetCodec(c.codecType)
+
+	codecByte, err := codec.Encode(request)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -60,12 +63,13 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 		return err
 	}
 
-	// todo 读取返回结果
-	err = connection.Read(response)
+	// 读取返回结果
+	message, err = connection.Read()
 	if err != nil {
 		return err
 	}
 
+	codec.Decode(message.GetData(), response)
 	return nil
 }
 

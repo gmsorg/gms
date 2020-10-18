@@ -1,7 +1,6 @@
 package connection
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -36,17 +35,15 @@ func (c *Connection) Send(reqData []byte) error {
 	return err
 }
 
-func (c *Connection) Read(response interface{}) error {
+func (c *Connection) Read() (protocol.Imessage, error) {
 	if c.conn == nil {
-		return errors.New("[Read] conn not exist")
+		return nil, errors.New("[Read] conn not exist")
 	}
 
 	message, err := c.messagePack.ReadUnPack(c.conn)
 	if err != nil {
-		return fmt.Errorf("Read %v", err)
+		return nil, fmt.Errorf("Read %v", err)
 	}
 
-	json.Unmarshal(message.GetData(), response)
-
-	return nil
+	return message, nil
 }
