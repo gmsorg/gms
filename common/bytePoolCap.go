@@ -29,6 +29,12 @@ type BytePoolCap struct {
 	wcap int
 }
 
+var BytePool *BytePoolCap
+
+func init() {
+	BytePool = NewBytePoolCap(20, 120, 120)
+}
+
 // NewBytePoolCap creates a new BytePool bounded to the given maxSize, with new
 // byte arrays sized based on width.
 func NewBytePoolCap(maxSize int, width int, capwidth int) (bp *BytePoolCap) {

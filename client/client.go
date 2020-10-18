@@ -1,106 +1,88 @@
 package client
 
 import (
-	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
-	"log"
-	"net"
-	"time"
 
-	"github.com/akka/gms/common"
-	"github.com/akka/gms/example/user"
+	"github.com/akkagao/gms/connection"
+	"github.com/akkagao/gms/discovery"
+	"github.com/akkagao/gms/protocol"
+	"github.com/akkagao/gms/selector"
 )
 
-var size = 4
-var width = 10
-var capWidth = 16
-
-type gmsConnection struct {
-	conn    net.Conn
-	bufPool *common.BytePoolCap
+type Client struct {
+	discovery   discovery.IDiscovery
+	selector    selector.ISelector
+	connection  map[string]connection.IConnection
+	messagePack protocol.IMessagePack
 }
 
-/**
-创建连接
+/*
+NewClient 初始化客户端
 */
-func Dial(address string) (*gmsConnection, error) {
-	var size = 4
-	var width = 512
-	var capWidth = 512
-
-	gmsConn := &gmsConnection{
-		bufPool: common.NewBytePoolCap(size, width, capWidth),
+func NewClient(discovery discovery.IDiscovery) (IClient, error) {
+	client := &Client{
+		discovery:   discovery,
+		connection:  make(map[string]connection.IConnection),
+		messagePack: protocol.NewMessagePack(),
 	}
-
-	conn, err := net.DialTimeout("tcp", address, time.Second*3)
+	server, err := discovery.GetServer()
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("NewClient error %v", err)
 	}
-
-	gmsConn.conn = conn
-	return gmsConn, nil
+	client.selector = selector.NewRandomSelect(server)
+	return client, nil
 }
 
-func (gc *gmsConnection) Call() {
-	// Done := c.conn.Go(ctx, servicePath, serviceMethod, args, reply, make(chan *Call, 1)).Done
-	// {"service_name":"UserServiceImpl","method_name":"GetUser"}
-
-	r := user.GetUserReq{
-		Id: time.Now().UnixNano() / 10e6,
-	}
-	rb, _ := json.Marshal(r)
-
-	reqMessage := common.ReqMessage{
-		ServiceName: "UserServiceImpl",
-		MethodName:  "GetUser",
-		ReqData:     rb,
+func (c *Client) Call(serviceFunc string, request interface{}, response interface{}) error {
+	serverKey := c.selector.Select()
+	if serverKey == "" {
+		return errors.New("can't find server")
 	}
 
-	b, err := json.Marshal(reqMessage)
+	connection := c.getCachedConnection(serverKey)
+
+	// todo 实现编码
+	codecByte, err := json.Marshal(request)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
 	}
 
-	gc.conn.Write(b)
-
-	// --------------read-----------
-	result := bytes.NewBuffer(nil)
-
-	// var buf [512]byte
-
-	buf := gc.bufPool.Get()
-	defer gc.bufPool.Put(buf)
-	for {
-		n, err := gc.conn.Read(buf[0:])
-		result.Write(buf[0:n])
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return
-		}
-		if n < gc.bufPool.WidthCap() {
-			break
-		}
+	message := protocol.NewMessage([]byte(serviceFunc), codecByte)
+	eb, err := c.messagePack.Pack(message)
+	if err != nil {
+		// 错误处理
+		fmt.Println(err)
+	}
+	err = connection.Send(eb)
+	if err != nil {
+		return err
 	}
 
-	res := &user.GetUserRes{}
-	resMessage := common.ResMessage{}
-	// resultValues := []reflect.Value{}
-	fmt.Println("====result.Bytes======")
-	fmt.Println(string(result.Bytes()))
-	fmt.Println("======result.Bytes====")
-	json.Unmarshal(result.Bytes(), &resMessage)
+	// todo 读取返回结果
+	err = connection.Read(response)
+	if err != nil {
+		return err
+	}
 
-	fmt.Println(resMessage.Code, resMessage.Msg)
+	return nil
+}
 
-	fmt.Println("==========resMessage.ResData=========")
-	fmt.Println(resMessage.ResData)
-	fmt.Println("===========resMessage.ResData========")
-	json.Unmarshal(resMessage.ResData, res)
+func (c *Client) getCachedConnection(address string) connection.IConnection {
+	if connection, ok := c.connection[address]; ok {
+		return connection
+	}
+	connection := c.generateClient(address)
+	c.connection[address] = connection
+	return connection
+}
 
-	fmt.Println(res)
+func (c *Client) generateClient(address string) connection.IConnection {
+	return connection.NewConnection(address)
+}
 
+func (c *Client) Close() {
+	// todo
+	panic("implement me")
 }
