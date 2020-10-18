@@ -6,7 +6,7 @@ import (
 
 	"github.com/akkagao/gms/client"
 	"github.com/akkagao/gms/discovery"
-	"github.com/akkagao/gms/example/V1/vo"
+	"github.com/akkagao/gms/example/model"
 )
 
 /*
@@ -22,8 +22,8 @@ func main() {
 		return
 	}
 
-	req := vo.AddUserReq{Name: "aaa"}
-	res := &vo.AddUserRes{}
+	req := &model.AddUserReq{Name: "aaa"}
+	res := &model.AddUserRes{}
 
 	err = demoClient.Call("user.Add", req, res)
 	if err != nil {
@@ -32,6 +32,4 @@ func main() {
 	fmt.Println(res)
 
 	fmt.Println(time.Since(start))
-	// conn.Read()
-
 }
