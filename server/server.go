@@ -46,8 +46,9 @@ func (s *server) InitServe() {
 	// codec := &protocol.MessagePack{}
 	// 启动gnet
 	s.gmsHandler = &gmsHandler{
-		gmsServer: s,
-		pool:      pool,
+		gmsServer:   s,
+		pool:        pool,
+		messagePack: protocol.NewMessagePack(),
 		// codec:     codec,
 	}
 	log.Fatal(gnet.Serve(

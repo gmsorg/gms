@@ -50,7 +50,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	}
 
 	message := protocol.NewMessage([]byte(serviceFunc), codecByte)
-	eb, err := c.messagePack.Encode(message)
+	eb, err := c.messagePack.Pack(message)
 	if err != nil {
 		// 错误处理
 		fmt.Println(err)

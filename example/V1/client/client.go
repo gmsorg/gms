@@ -86,7 +86,7 @@ func funcName(i int) []byte {
 
 	message := protocol.NewMessage([]byte("user.Add"), addUserData)
 	mp := protocol.MessagePack{}
-	encodeMessage, err := mp.Encode(message)
+	encodeMessage, err := mp.Pack(message)
 	if err != nil {
 		fmt.Println(err)
 	}

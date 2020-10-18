@@ -8,19 +8,19 @@ import (
 func TestMessagePack_Encode(t *testing.T) {
 	message := NewMessage([]byte("user.add"), []byte("hello"))
 	mp := MessagePack{}
-	encodeData, err := mp.Encode(message)
+	encodeData, err := mp.Pack(message)
 	fmt.Println(string(encodeData), err)
 }
 
 func TestMessagePack_Decode(t *testing.T) {
 	message := NewMessage([]byte("user.add"), []byte("hello world"))
 	mp := MessagePack{}
-	encodeData, err := mp.Encode(message)
+	encodeData, err := mp.Pack(message)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println("encodeData:", string(encodeData))
-	m, err := mp.Decode(encodeData)
+	m, err := mp.UnPack(encodeData)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -18,14 +18,15 @@ type gmsHandler struct {
 	gnetServer gnet.Server
 	// ctx    gmsContext.Context
 	// cancel gmsContext.CancelFunc
-	gmsServer IServer
+	messagePack protocol.IMessagePack
+	gmsServer   IServer
 }
 
 func (gh *gmsHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Action) {
 	// Use ants pool to unblock the event-loop.
-	mp := protocol.MessagePack{}
+
 	err := gh.pool.Submit(func() {
-		gh.handle(mp, frame, c)
+		gh.handle(frame, c)
 	})
 
 	if err != nil {
@@ -37,9 +38,9 @@ func (gh *gmsHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 /**
 处理接收到的消息
 */
-func (gh *gmsHandler) handle(mp protocol.MessagePack, frame []byte, c gnet.Conn) {
+func (gh *gmsHandler) handle(frame []byte, c gnet.Conn) {
 	// 解析收到的二进制消息
-	message, err := mp.Decode(frame)
+	message, err := gh.messagePack.UnPack(frame)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -53,8 +54,14 @@ func (gh *gmsHandler) handle(mp protocol.MessagePack, frame []byte, c gnet.Conn)
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	resultMessage := protocol.NewMessage([]byte("1"), result)
+	rb, err := gh.messagePack.Pack(resultMessage)
+	if err != nil {
+		fmt.Println("[gmsHandler handle] error: %v", err)
+	}
 	// 给客户端返回处理结果
-	c.AsyncWrite(result)
+	c.AsyncWrite(rb)
 }
 
 //
@@ -86,7 +93,7 @@ func (gh *gmsHandler) handle(mp protocol.MessagePack, frame []byte, c gnet.Conn)
 // 			break
 // 		}
 //
-// 		message, err := mp.Decode(data)
+// 		message, err := mp.UnPack(data)
 // 		if err != nil {
 // 			fmt.Println(err)
 // 		}

@@ -1,16 +1,19 @@
 package connection
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
 	"time"
 
 	"github.com/akkagao/gms/common"
+	"github.com/akkagao/gms/protocol"
 )
 
 type Connection struct {
-	conn net.Conn
+	conn        net.Conn
+	messagePack protocol.IMessagePack
 }
 
 func NewConnection(address string) IConnection {
@@ -20,7 +23,8 @@ func NewConnection(address string) IConnection {
 		return nil
 	}
 	return &Connection{
-		conn: conn,
+		conn:        conn,
+		messagePack: protocol.NewMessagePack(),
 	}
 }
 
@@ -37,24 +41,12 @@ func (c *Connection) Read(response interface{}) error {
 		return errors.New("[Read] conn not exist")
 	}
 
-	bytes := common.BytePool.Get()
-	defer common.BytePool.Put(bytes)
+	message, err := c.messagePack.ReadUnPack(c.conn)
+	if err != nil {
+		return fmt.Errorf("Read %v", err)
+	}
 
-	// len := 0
-	//
-	// for {
-	// 	n, err := c.conn.Read(bytes[len:])
-	// 	if n > 0 {
-	// 		len += n
-	// 	}
-	// 	if err != nil {
-	// 		if err != io.EOF {
-	// 			// Error Handler
-	// 		}
-	//
-	// 		break
-	// 	}
-	// }
+	json.Unmarshal(message.GetData(), response)
 
 	return nil
 }
