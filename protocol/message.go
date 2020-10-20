@@ -102,5 +102,5 @@ func (m *Message) GetData() []byte {
 GetCount 获取消息总长度
 */
 func (m *Message) GetCount() uint32 {
-	return common.HeaderLength + m.extLen + m.dataLen
+	return m.count
 }

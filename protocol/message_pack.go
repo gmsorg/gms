@@ -101,7 +101,7 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 	msg.codecType = codec.CodecType(codecType[0])
 
 	fmt.Println(content[1:msg.GetExtLen()])
-	fmt.Println(string(content[1:msg.GetExtLen()]))
+	fmt.Println(string(content[1:msg.GetExtLen()+1]))
 	fmt.Println(string(content[msg.GetExtLen()+1:]))
 	// 获取扩展消息
 	msg.SetExt(content[1:msg.GetExtLen()])
