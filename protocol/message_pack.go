@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 
+	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/common"
 )
 
@@ -90,16 +91,22 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 	msg := &Message{
 		extLen:  extLen,
 		dataLen: dataLen,
-		count:   common.HeaderLength + extLen + dataLen,
+		count:   common.HeaderLength + extLen + dataLen + 1,
 	}
 
 	// 截取消息头后的所有内容
 	content := binaryMessage[common.HeaderLength:msg.GetCount()]
 
+	codecType := content[:1]
+	msg.codecType = codec.CodecType(codecType[0])
+
+	fmt.Println(content[1:msg.GetExtLen()])
+	fmt.Println(string(content[1:msg.GetExtLen()]))
+	fmt.Println(string(content[msg.GetExtLen()+1:]))
 	// 获取扩展消息
-	msg.SetExt(content[:msg.GetExtLen()])
+	msg.SetExt(content[1:msg.GetExtLen()])
 	// 获取消息内容
-	msg.SetData(content[msg.GetExtLen():])
+	msg.SetData(content[msg.GetExtLen()+1:])
 	return msg, nil
 }
 
