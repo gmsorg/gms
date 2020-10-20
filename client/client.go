@@ -53,31 +53,39 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 
 	connection := c.getCachedConnection(serverKey)
 
+	// 获取指定的序列化器
 	codec := codec.GetCodec(c.codecType)
 
+	// 把 request 序列化成字节数组
 	codecByte, err := codec.Encode(request)
 	if err != nil {
 		fmt.Println(err)
 	}
 
+	// 组装消息
 	message := protocol.NewMessage([]byte(serviceFunc), codecByte)
+
+	// 打包消息
 	eb, err := c.messagePack.Pack(message)
 	if err != nil {
 		// 错误处理
 		fmt.Println(err)
 	}
+
+	// 发送打包好的消息
 	err = connection.Send(eb)
 	if err != nil {
 		return err
 	}
 
-	// 读取返回结果
-	message, err = connection.Read()
+	// 读取返回结果消息，并解包
+	messageRes, err := connection.Read()
 	if err != nil {
 		return err
 	}
 
-	codec.Decode(message.GetData(), response)
+	// 返序列化返回结果 成response
+	codec.Decode(messageRes.GetData(), response)
 	return nil
 }
 
