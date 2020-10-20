@@ -63,7 +63,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	}
 
 	// 组装消息
-	message := protocol.NewMessage([]byte(serviceFunc), codecByte)
+	message := protocol.NewMessage([]byte(serviceFunc), codecByte, c.codecType)
 
 	// 打包消息
 	eb, err := c.messagePack.Pack(message)

@@ -43,6 +43,11 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 		return nil, errors.New(s)
 	}
 
+	if err := binary.Write(buffer, binary.BigEndian, message.GetCodecType()); err != nil {
+		s := fmt.Sprintf("[Pack] Pack GetCodecType error , %v", err)
+		return nil, errors.New(s)
+	}
+
 	if message.GetExtLen() > 0 {
 		if err := binary.Write(buffer, binary.BigEndian, message.GetExt()); err != nil {
 			s := fmt.Sprintf("[Pack] Pack ext error , %v", err)
