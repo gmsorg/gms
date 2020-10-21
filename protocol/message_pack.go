@@ -94,19 +94,16 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 		count:   common.HeaderLength + extLen + dataLen + 1,
 	}
 
-	// 截取消息头后的所有内容
-	content := binaryMessage[common.HeaderLength:msg.GetCount()]
-
-	codecType := content[:1]
+	codecType := binaryMessage[common.HeaderLength : common.HeaderLength+1]
 	msg.codecType = codec.CodecType(codecType[0])
 
-	fmt.Println(content[1:msg.GetExtLen()])
-	fmt.Println(string(content[1:msg.GetExtLen()+1]))
-	fmt.Println(string(content[msg.GetExtLen()+1:]))
+	// 截取消息头后的所有内容
+	content := binaryMessage[common.HeaderLength+1 : msg.GetCount()]
+
 	// 获取扩展消息
-	msg.SetExt(content[1:msg.GetExtLen()])
+	msg.SetExt(content[:msg.GetExtLen()])
 	// 获取消息内容
-	msg.SetData(content[msg.GetExtLen()+1:])
+	msg.SetData(content[msg.GetExtLen():])
 	return msg, nil
 }
 
@@ -136,7 +133,20 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 	msg := &Message{
 		extLen:  extLen,
 		dataLen: dataLen,
-		count:   common.HeaderLength + extLen + dataLen,
+		count:   common.HeaderLength + extLen + dataLen + 1,
+	}
+
+	codecType := make([]byte, 1)
+	{
+		n, err := io.ReadFull(conn, codecType)
+		if err != nil {
+			fmt.Println("[Read] read codecType error", err)
+			return nil, err
+		}
+		if uint32(n) != 1 {
+			fmt.Println("[Read] read codecType len error")
+			return nil, errors.New("read codecType error")
+		}
 	}
 
 	extData := make([]byte, extLen)
@@ -167,6 +177,8 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 		}
 	}
 
+	// 设置编码类型
+	msg.SetCodecType(codec.CodecType(codecType[0]))
 	// 获取扩展消息
 	msg.SetExt(extData)
 	// 获取消息内容

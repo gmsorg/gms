@@ -54,10 +54,10 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	connection := c.getCachedConnection(serverKey)
 
 	// 获取指定的序列化器
-	codec := codec.GetCodec(c.codecType)
+	codecReq := codec.GetCodec(c.codecType)
 
 	// 把 request 序列化成字节数组
-	codecByte, err := codec.Encode(request)
+	codecByte, err := codecReq.Encode(request)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -84,8 +84,9 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 		return err
 	}
 
+	codecRes := codec.GetCodec(messageRes.GetCodecType())
 	// 返序列化返回结果 成response
-	codec.Decode(messageRes.GetData(), response)
+	codecRes.Decode(messageRes.GetData(), response)
 	return nil
 }
 

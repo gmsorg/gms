@@ -2,7 +2,6 @@ package gmsContext
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/akkagao/gms/codec"
@@ -46,8 +45,10 @@ func (c *Context) Param(param interface{}) error {
 }
 
 func (c *Context) Result(result interface{}) error {
-	// todo 改为其他序列化方式
-	r, err := json.Marshal(result)
+	codec := codec.GetCodec(c.message.GetCodecType())
+	r, err:=codec.Encode(result)
+	// // todo 改为其他序列化方式
+	// r, err := json.Marshal(result)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// 设置JSON 序列化器
-	demoClient.SetCodecType(codec.JSON)
+	demoClient.SetCodecType(codec.Msgpack)
 
 	req := &model.AddUserReq{Name: "aaa"}
 	res := &model.AddUserRes{}
