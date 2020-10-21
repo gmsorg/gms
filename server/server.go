@@ -105,6 +105,8 @@ func (s *server) GetRouter(handlerName string) (gmsContext.Controller, error) {
 /*
 处理方法
 */
+// func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error) {
+// func (s *server) HandlerMessage(message protocol.Imessage) (gmsContext.Context, error) {
 func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error) {
 	// fmt.Println(string(message.GetExt()))
 	controller, err := s.GetRouter(string(message.GetExt()))
@@ -113,8 +115,9 @@ func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context,
 		return nil, fmt.Errorf("No Router", err)
 	}
 
+	// todo 可以考虑使用 pool
 	context := gmsContext.NewContext()
-	context.SetParam(message.GetData())
+	context.SetMessage(message)
 	// 调用方法
 	err = controller(context)
 	if err != nil {

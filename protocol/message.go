@@ -1,28 +1,34 @@
 package protocol
 
-import "github.com/akkagao/gms/common"
+import (
+	"github.com/akkagao/gms/codec"
+	"github.com/akkagao/gms/common"
+)
 
 /*
 Message 请求消息和返回消息体封装
 */
 type Message struct {
-	extLen  uint32
-	ext     []byte
-	dataLen uint32
-	data    []byte
-	count   uint32
+	extLen    uint32
+	ext       []byte
+	codecType codec.CodecType
+	dataLen   uint32
+	data      []byte
+	count     uint32
 }
 
 /*
 NewMessage 初始化消息方法
 */
-func NewMessage(ext, data []byte) Imessage {
+func NewMessage(ext, data []byte, codecType codec.CodecType) Imessage {
 	return &Message{
-		extLen:  uint32(len(ext)),
-		ext:     ext,
-		dataLen: uint32(len(data)),
-		data:    data,
-		count:   common.HeaderLength + uint32(len(ext)) + uint32(len(data)),
+		extLen:    uint32(len(ext)),
+		ext:       ext,
+		codecType: codecType,
+		dataLen:   uint32(len(data)),
+		data:      data,
+		// count= 消息头长度（描述扩展信息和消息数据的长度信息）+ 扩展信息的长度+消息长度+编码方式信息长度（1一个字节）
+		count: common.HeaderLength + uint32(len(ext)) + uint32(len(data)) + 1,
 	}
 }
 
@@ -52,6 +58,16 @@ GetExt 获取扩展数据
 */
 func (m *Message) GetExt() []byte {
 	return m.ext
+}
+
+// 设置编码方式
+func (m *Message) SetCodecType(codecType codec.CodecType) {
+	m.codecType = codecType
+}
+
+// 获取编码方式
+func (m *Message) GetCodecType() codec.CodecType {
+	return m.codecType
 }
 
 /*
@@ -86,5 +102,5 @@ func (m *Message) GetData() []byte {
 GetCount 获取消息总长度
 */
 func (m *Message) GetCount() uint32 {
-	return common.HeaderLength + m.extLen + m.dataLen
+	return m.count
 }

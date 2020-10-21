@@ -3,17 +3,19 @@ package protocol
 import (
 	"fmt"
 	"testing"
+
+	"github.com/akkagao/gms/codec"
 )
 
 func TestMessagePack_Encode(t *testing.T) {
-	message := NewMessage([]byte("user.add"), []byte("hello"))
+	message := NewMessage([]byte("user.add"), []byte("hello"), codec.JSON)
 	mp := MessagePack{}
 	encodeData, err := mp.Pack(message)
 	fmt.Println(string(encodeData), err)
 }
 
 func TestMessagePack_Decode(t *testing.T) {
-	message := NewMessage([]byte("user.add"), []byte("hello world"))
+	message := NewMessage([]byte("user.add"), []byte("hello world"), codec.Msgpack)
 	mp := MessagePack{}
 	encodeData, err := mp.Pack(message)
 	if err != nil {
@@ -25,6 +27,6 @@ func TestMessagePack_Decode(t *testing.T) {
 		fmt.Println(err)
 	}
 	fmt.Println("GetExtLen:", m.GetExtLen(), "GetDataLen:", m.GetDataLen(),
-		"GetExt:", string(m.GetExt()), "GetData:", string(m.GetData()))
+		"GetCodecType:", m.GetCodecType(), " GetExt:", string(m.GetExt()), "GetData:", string(m.GetData()))
 	fmt.Println("GetCount:", m.GetCount())
 }

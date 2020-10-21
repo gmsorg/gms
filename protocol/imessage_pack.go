@@ -1,6 +1,8 @@
 package protocol
 
-import "net"
+import (
+	"net"
+)
 
 /*
 IMessagePack 消息封包、解包

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/akkagao/gms/discovery"
-	"github.com/akkagao/gms/example/V1/vo"
+	"github.com/akkagao/gms/example/model"
 )
 
 func TestClient_Call(t *testing.T) {
@@ -17,8 +17,8 @@ func TestClient_Call(t *testing.T) {
 		return
 	}
 
-	req := vo.AddUserReq{Name: "aaa"}
-	res := &vo.AddUserRes{}
+	req := model.AddUserReq{Name: "aaa"}
+	res := &model.AddUserRes{}
 
 	err = client.Call("user.Add", req, res)
 	if err != nil {

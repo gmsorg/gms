@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 
+	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/common"
 )
 
@@ -40,6 +41,11 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 
 	if err := binary.Write(buffer, binary.BigEndian, message.GetDataLen()); err != nil {
 		s := fmt.Sprintf("[Pack] Pack dataLen error , %v", err)
+		return nil, errors.New(s)
+	}
+
+	if err := binary.Write(buffer, binary.BigEndian, message.GetCodecType()); err != nil {
+		s := fmt.Sprintf("[Pack] Pack GetCodecType error , %v", err)
 		return nil, errors.New(s)
 	}
 
@@ -85,11 +91,14 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 	msg := &Message{
 		extLen:  extLen,
 		dataLen: dataLen,
-		count:   common.HeaderLength + extLen + dataLen,
+		count:   common.HeaderLength + extLen + dataLen + 1,
 	}
 
+	codecType := binaryMessage[common.HeaderLength : common.HeaderLength+1]
+	msg.codecType = codec.CodecType(codecType[0])
+
 	// 截取消息头后的所有内容
-	content := binaryMessage[common.HeaderLength:msg.GetCount()]
+	content := binaryMessage[common.HeaderLength+1 : msg.GetCount()]
 
 	// 获取扩展消息
 	msg.SetExt(content[:msg.GetExtLen()])
@@ -124,7 +133,20 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 	msg := &Message{
 		extLen:  extLen,
 		dataLen: dataLen,
-		count:   common.HeaderLength + extLen + dataLen,
+		count:   common.HeaderLength + extLen + dataLen + 1,
+	}
+
+	codecType := make([]byte, 1)
+	{
+		n, err := io.ReadFull(conn, codecType)
+		if err != nil {
+			fmt.Println("[Read] read codecType error", err)
+			return nil, err
+		}
+		if uint32(n) != 1 {
+			fmt.Println("[Read] read codecType len error")
+			return nil, errors.New("read codecType error")
+		}
 	}
 
 	extData := make([]byte, extLen)
@@ -155,6 +177,8 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 		}
 	}
 
+	// 设置编码类型
+	msg.SetCodecType(codec.CodecType(codecType[0]))
 	// 获取扩展消息
 	msg.SetExt(extData)
 	// 获取消息内容

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/akkagao/gms"
-	"github.com/akkagao/gms/example/V1/server/handler/user"
+	"github.com/akkagao/gms/example/server/handler/user"
 )
 
 func main() {

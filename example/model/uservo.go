@@ -1,4 +1,4 @@
-package vo
+package model
 
 type AddUserReq struct {
 	Name    string
