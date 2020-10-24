@@ -2,8 +2,10 @@ package main
 
 import (
 	"github.com/akkagao/gms"
-	"github.com/akkagao/gms/example/model"
+
 	"github.com/akkagao/gms/gmsContext"
+
+	"example/model"
 )
 
 func main() {

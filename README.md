@@ -2,13 +2,13 @@
 
 今天是2020年10月24日，一年一度的程序员节，把这个还在开发中的项目开源出来，感兴趣的朋友可以一起参与开发。如果有大神路过请多指教。
 
-
-
 GMS是一款基于[gnet](https://github.com/panjf2000/gnet)网络框架开发的Golang RPC微服务框架。
 
 特点：
 
 1：非常简单、学习成本极低。GMS处于初期阶段您想参与开发也非常简单。
+
+​		只要您之前使用过类似Gin、beego这样的web框架。就能快速上手，使用方法和这些web框架一样简单。
 
 2： 不用定义proto等协议文件。
 
@@ -22,7 +22,7 @@ GMS是一款基于[gnet](https://github.com/panjf2000/gnet)网络框架开发的
 
 ## 快速开始
 
-到底有多简单呢。只要您之前使用过类似Gin、beego这样的web框架，使用方法和这些web框架一样简单
+下载源码 进入 example 直接运行。或者按照以下步骤自己搭建Demo运行
 
 下面我们以一个加法计算为类
 
@@ -48,8 +48,10 @@ package main
 
 import (
 	"github.com/akkagao/gms"
-	"github.com/akkagao/gms/example/model"
+
 	"github.com/akkagao/gms/gmsContext"
+
+	"example/model"
 )
 
 func main() {
@@ -59,7 +61,7 @@ func main() {
 	// 添加业务处理路由（addition是业务处理方法的唯一标识，客户端调用需要使用）
 	gms.AddRouter("addition", Addition)
 
-	// 启动，以 1024 为启动端口
+	// 启动，以1024 为启动端口
 	gms.Run(1024)
 }
 
@@ -93,7 +95,8 @@ import (
 	"github.com/akkagao/gms/client"
 	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/discovery"
-	"github.com/akkagao/gms/example/model"
+
+	"example/model"
 )
 
 /*
