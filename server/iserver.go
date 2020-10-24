@@ -7,9 +7,9 @@ import (
 
 type IServer interface {
 	// 初始化GMS服务
-	InitServe()
+	InitServe(port int)
 	// 启动GMS服务
-	Run()
+	Run(port int)
 	// 停止GMS服务
 	Stop()
 	// 注册处理器

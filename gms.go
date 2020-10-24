@@ -30,10 +30,10 @@ func (g *gms) AddRouter(handlerName string, handlerFunc gmsContext.Controller) {
 /*
 启动GMS
 */
-func (g *gms) Run() {
+func (g *gms) Run(port int) {
 	// 展示Logo
 	common.ShowLogo()
 
 	// 启动GMS服务
-	g.server.Run()
+	g.server.Run(port)
 }

@@ -37,7 +37,7 @@ func NewServer() IServer {
 /*
 准备启动服务的资源
 */
-func (s *server) InitServe() {
+func (s *server) InitServe(port int) {
 	fmt.Println("[gmsServer] InitServe")
 
 	pool := goroutine.Default()
@@ -51,9 +51,13 @@ func (s *server) InitServe() {
 		messagePack: protocol.NewMessagePack(),
 		// codec:     codec,
 	}
+
+	if port < 1 {
+		port = common.GmsPort
+	}
 	log.Fatal(gnet.Serve(
 		s.gmsHandler,
-		fmt.Sprintf("tcp://:%v", common.GmsPort),
+		fmt.Sprintf("tcp://:%v", port),
 		gnet.WithMulticore(true),
 		gnet.WithTCPKeepAlive(time.Minute*5), // todo 需要确定是否对长连接有影响
 		// gnet.WithCodec(codec)
@@ -63,10 +67,10 @@ func (s *server) InitServe() {
 /*
 启动服务
 */
-func (s *server) Run() {
+func (s *server) Run(port int) {
 	fmt.Println("[gmsServer] start run gms gmsServer")
 	// 准备启动服务的资源
-	s.InitServe()
+	s.InitServe(port)
 
 }
 
