@@ -2,16 +2,12 @@ package main
 
 import (
 	"github.com/akkagao/gms"
+	"github.com/akkagao/gms/example/model"
 
 	"github.com/akkagao/gms/gmsContext"
-
-	"example/model"
 )
 
 func main() {
-	// 初始化GMS服务
-	gms := gms.NewGms()
-
 	// 添加业务处理路由（addition是业务处理方法的唯一标识，客户端调用需要使用）
 	gms.AddRouter("addition", Addition)
 

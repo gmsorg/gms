@@ -6,8 +6,7 @@ import (
 	"github.com/akkagao/gms/client"
 	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/discovery"
-
-	"example/model"
+	"github.com/akkagao/gms/example/model"
 )
 
 /*

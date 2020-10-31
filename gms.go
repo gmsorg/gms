@@ -10,30 +10,33 @@ type gms struct {
 	server server.IServer
 }
 
+var defaultGms = newGms()
+
 /*
 初始化GMS
 */
-func NewGms() server.IGms {
+func newGms() *gms {
 	gms := gms{
 		server: server.NewServer(),
 	}
 	return &gms
 }
 
-/*
+/**
 添加服务路由
 */
-func (g *gms) AddRouter(handlerName string, handlerFunc gmsContext.Controller) {
-	g.server.AddRouter(handlerName, handlerFunc)
+func AddRouter(handlerName string, handlerFunc gmsContext.Controller) {
+	defaultGms.server.AddRouter(handlerName, handlerFunc)
 }
+
 
 /*
 启动GMS
 */
-func (g *gms) Run(port int) {
+func Run(port int) {
 	// 展示Logo
 	common.ShowLogo()
 
 	// 启动GMS服务
-	g.server.Run(port)
+	defaultGms.server.Run(port)
 }
