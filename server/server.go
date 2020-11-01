@@ -79,7 +79,7 @@ func (s *server) InitServe(port int) {
 /*
 启动服务
 */
-func (s *server) Run(ip string, port int) {
+func (s *server) Run( ip string, port int) {
 	log.Println("[gmsServer] start run gms gmsServer")
 	// 启动所有插件
 	s.plugins.Start()

@@ -1,6 +1,7 @@
 package registe
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -12,24 +13,28 @@ import (
 )
 
 type RedisRegistePlugin struct {
+	GmsServerName     string
 	GmsServiceAddress string
 	RedisAddress      []string
 	kv                store.Store
+	UpdateInterval    time.Duration
 }
 
 func init() {
 	redis.Register()
 }
 
-func NewRedisRegistePlugin(redisAddress []string) plugin.IPlugin {
+func NewRedisRegistePlugin(serverName string, redisAddress []string) plugin.IPlugin {
 	return &RedisRegistePlugin{
-		RedisAddress: redisAddress,
+		GmsServerName:  serverName,
+		RedisAddress:   redisAddress,
+		UpdateInterval: time.Minute,
 	}
 }
 
 func (r *RedisRegistePlugin) Start() error {
 	kv, err := valkeyrie.NewStore(
-		store.REDIS, // or "consul"
+		store.REDIS,
 		r.RedisAddress,
 		&store.Config{
 			ConnectionTimeout: 10 * time.Second,
@@ -41,14 +46,53 @@ func (r *RedisRegistePlugin) Start() error {
 	}
 	r.kv = kv
 
-	// todo
+	err = r.kv.Put(plugin.BasePath, []byte(plugin.BasePath), &store.WriteOptions{IsDir: true})
+	if err != nil {
+		fmt.Errorf("[RedisRegistePlugin] put BasePath error: %v", err)
+		return err
+	}
+
+	nodeName := fmt.Sprintf("%v/%v", plugin.BasePath, r.GmsServerName)
+	err = r.kv.Put(nodeName, []byte(r.GmsServerName), &store.WriteOptions{IsDir: true})
+	if err != nil {
+		fmt.Errorf("[RedisRegistePlugin] put nodeName: %v error: %v", nodeName, err)
+	}
+
 	return nil
 
 }
 
-// todo
-// gms#serverName#funcName
+// gms/serverName/serviceAddress
 func (r *RedisRegistePlugin) Registe(ip string, port int) error {
 	// 注册服务
+	r.GmsServiceAddress = fmt.Sprintf("%v:%v", ip, port)
+
+	err := r.registeService()
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	if r.UpdateInterval > 0 {
+		ticker := time.NewTicker(r.UpdateInterval)
+		go func() {
+			select {
+			case <-ticker.C:
+				err := r.registeService()
+				if err != nil {
+					log.Printf("[Registe] error: %v", err)
+				}
+			}
+		}()
+	}
+	return nil
+}
+
+func (r *RedisRegistePlugin) registeService() error {
+	nodeName := fmt.Sprintf("%v/%v/%v", plugin.BasePath, r.GmsServerName, r.GmsServiceAddress)
+	err := r.kv.Put(nodeName, []byte(r.GmsServiceAddress), &store.WriteOptions{TTL: r.UpdateInterval * 2})
+	if err != nil {
+		return fmt.Errorf("[RedisRegistePlugin] put nodeName: %v error: %v", nodeName, err)
+	}
 	return nil
 }

@@ -13,10 +13,11 @@ func main() {
 	gms.AddRouter("addition", Addition)
 
 	// 注册redis服务发现插件
-	gms.AddPlugin(registe.NewRedisRegistePlugin([]string{"127.0.0.1:6379"}))
+	gms.AddPlugin(registe.NewRedisRegistePlugin("gmsDemo", []string{"127.0.0.1:6379"}))
 
 	// 启动，以1024 为启动端口
 	gms.Run("127.0.0.1", 1024)
+	// gms.DefaultRun()
 }
 
 /*

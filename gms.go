@@ -39,6 +39,21 @@ func AddPlugin(plugin plugin.IPlugin) {
 	defaultGms.server.AddPlugin(plugin)
 }
 
+/**
+默认启动参数  host+1024
+*/
+// func DefaultRun() {
+// 	// 展示Logo
+// 	common.ShowLogo()
+//
+// 	hostName, err := os.Hostname()
+// 	if err != nil {
+// 		log.Fatalf("[DefaultRun] get hostName error: %v", err)
+// 	}
+// 	// 启动GMS服务
+// 	defaultGms.server.Run(hostName, 1024)
+// }
+
 /*
 启动GMS
 */
