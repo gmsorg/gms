@@ -1,9 +1,11 @@
 package common
 
-import "fmt"
+import (
+	"log"
+)
 
 func ShowLogo() {
-	fmt.Println(
+	log.Println(
 		`       _____   __  __    _____ 
       / ____| |  \/  |  / ____|
      | |  __  | \  / | | (___  

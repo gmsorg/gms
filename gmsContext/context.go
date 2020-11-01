@@ -2,7 +2,7 @@ package gmsContext
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/protocol"
@@ -38,7 +38,7 @@ func (c *Context) Param(param interface{}) error {
 
 	// err := json.Unmarshal(c.message.GetData(), param)
 	if err != nil {
-		fmt.Println("[Param] error", err)
+		log.Println("[Param] error", err)
 		return err
 	}
 	return nil
@@ -46,13 +46,13 @@ func (c *Context) Param(param interface{}) error {
 
 func (c *Context) Result(result interface{}) error {
 	codec := codec.GetCodec(c.message.GetCodecType())
-	r, err:=codec.Encode(result)
+	r, err := codec.Encode(result)
 	// // todo 改为其他序列化方式
 	// r, err := json.Marshal(result)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-	// fmt.Println(len(r))
+	// log.Println(len(r))
 	c.resultData = r
 	return nil
 }

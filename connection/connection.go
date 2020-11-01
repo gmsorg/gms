@@ -18,7 +18,7 @@ type Connection struct {
 func NewConnection(address string) IConnection {
 	conn, err := net.DialTimeout("tcp", address, time.Second*common.ConnectTimeout)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil
 	}
 	return &Connection{

@@ -6,5 +6,5 @@ import (
 )
 
 func TestGenIdentity(t *testing.T) {
-	fmt.Println(GenIdentity())
+	log.Println(GenIdentity())
 }

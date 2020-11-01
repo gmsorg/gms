@@ -20,16 +20,16 @@ func TestMsgpackCodec_Encode(t *testing.T) {
 	}
 	ub, err := msgpackCodec.Encode(demoEncode)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	demoDecode := &demo{}
 	err = msgpackCodec.Decode(ub, demoDecode)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
-	fmt.Println(demoDecode.Inter)
-	fmt.Println(demoEncode.Inter)
-	fmt.Println(demoEncode.Str == demoDecode.Str, demoEncode.Number == demoDecode.Number, demoEncode == *demoDecode)
+	log.Println(demoDecode.Inter)
+	log.Println(demoEncode.Inter)
+	log.Println(demoEncode.Str == demoDecode.Str, demoEncode.Number == demoDecode.Number, demoEncode == *demoDecode)
 }

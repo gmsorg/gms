@@ -19,7 +19,7 @@ func main() {
 	// 初始化一个客户端对象
 	additionClient, err := client.NewClient(discovery)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
@@ -34,7 +34,7 @@ func main() {
 	// 调用服务
 	err = additionClient.Call("addition", req, res)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-	fmt.Println(fmt.Sprintf("%d+%d=%d", req.NumberA, req.NumberB, res.Result))
+	log.Println(fmt.Sprintf("%d+%d=%d", req.NumberA, req.NumberB, res.Result))
 }

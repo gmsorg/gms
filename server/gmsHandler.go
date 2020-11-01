@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/panjf2000/gnet"
 	"github.com/panjf2000/gnet/pool/goroutine"
@@ -30,7 +31,7 @@ func (gh *gmsHandler) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 	})
 
 	if err != nil {
-		fmt.Println("[React] error:", err)
+		log.Println("[React] error:", err)
 	}
 	return
 }
@@ -42,23 +43,23 @@ func (gh *gmsHandler) handle(frame []byte, c gnet.Conn) {
 	// 解析收到的二进制消息
 	message, err := gh.messagePack.UnPack(frame)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	// 调用用户方法
 	context, err := gh.gmsServer.HandlerMessage(message)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	// 获取用户方法返回的结果
 	result, err := context.GetResult()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	resultMessage := protocol.NewMessage([]byte("1"), result, message.GetCodecType())
 	rb, err := gh.messagePack.Pack(resultMessage)
 	if err != nil {
-		fmt.Println("[gmsHandler handle] error: %v", err)
+		log.Println("[gmsHandler handle] error: %v", err)
 	}
 	// 给客户端返回处理结果
 	c.AsyncWrite(rb)
@@ -81,34 +82,34 @@ func (gh *gmsHandler) handle(frame []byte, c gnet.Conn) {
 // 		if messageCount == 0 {
 // 			data = frame
 // 		} else if len(data) > int(messageCount) {
-// 			fmt.Println(connid, "========11111==========")
-// 			fmt.Println(connid, len(data), int(messageCount))
-// 			fmt.Println(string(data))
-// 			fmt.Println(connid, "==========111111========")
+// 			log.Println(connid, "========11111==========")
+// 			log.Println(connid, len(data), int(messageCount))
+// 			log.Println(string(data))
+// 			log.Println(connid, "==========111111========")
 // 			data = data[messageCount:]
-// 			fmt.Println(connid, "==========2222========")
-// 			fmt.Println(string(data))
-// 			fmt.Println(connid, "==========22222========")
+// 			log.Println(connid, "==========2222========")
+// 			log.Println(string(data))
+// 			log.Println(connid, "==========22222========")
 // 		} else {
 // 			break
 // 		}
 //
 // 		message, err := mp.UnPack(data)
 // 		if err != nil {
-// 			fmt.Println(err)
+// 			log.Println(err)
 // 		}
-// 		fmt.Println(connid, "==============data==========")
-// 		fmt.Println(string(message.GetData()))
-// 		fmt.Println(connid, "==============data==========")
+// 		log.Println(connid, "==============data==========")
+// 		log.Println(string(message.GetData()))
+// 		log.Println(connid, "==============data==========")
 // 		messageCount = message.GetCount()
 //
 // 		context, err := gh.gmsServer.HandlerMessage(message)
 // 		if err != nil {
-// 			fmt.Println(err)
+// 			log.Println(err)
 // 		}
 // 		result, err := context.GetResult()
 // 		if err != nil {
-// 			fmt.Println(err)
+// 			log.Println(err)
 // 		}
 // 		c.AsyncWrite(result)
 // 	}
@@ -130,8 +131,8 @@ func (gh *gmsHandler) OnOpened(c gnet.Conn) (out []byte, action gnet.Action) {
 	// ctx, _ := gmsContext.WithCancel(gmsContext.Background())
 	connid := common.GenIdentity()
 	ctx := context.WithValue(context.Background(), "connid", connid)
-	fmt.Println(fmt.Sprintf("[OnOpened] client: %v open. RemoteAddr:%v", connid, c.RemoteAddr().String()))
-	fmt.Println("[OnOpened] Conn count:", gh.gnetServer.CountConnections())
+	log.Println(fmt.Sprintf("[OnOpened] client: %v open. RemoteAddr:%v", connid, c.RemoteAddr().String()))
+	log.Println("[OnOpened] Conn count:", gh.gnetServer.CountConnections())
 	c.SetContext(ctx)
 	return
 }
@@ -141,10 +142,10 @@ gnet 连接断开
 */
 func (gh *gmsHandler) OnClosed(c gnet.Conn, err error) (action gnet.Action) {
 	if err != nil {
-		fmt.Println("[OnClosed] error:", err)
+		log.Println("[OnClosed] error:", err)
 		return
 	}
 	ctx := c.Context().(context.Context)
-	fmt.Println("[OnClosed] client: " + ctx.Value("connid").(string) + " Close")
+	log.Println("[OnClosed] client: " + ctx.Value("connid").(string) + " Close")
 	return
 }

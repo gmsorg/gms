@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 
 	"github.com/akkagao/gms/codec"
@@ -63,7 +64,7 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 		}
 	}
 
-	// fmt.Println(string(buffer.Bytes()))
+	// log.Println(string(buffer.Bytes()))
 	return buffer.Bytes(), nil
 }
 
@@ -73,7 +74,7 @@ UnPack 消息解码
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
-	// fmt.Println("1:binaryMessage:", string(binaryMessage))
+	// log.Println("1:binaryMessage:", string(binaryMessage))
 	header := bytes.NewReader(binaryMessage[:common.HeaderLength])
 
 	// 只解压head的信息，得到dataLen和msgID
@@ -111,12 +112,12 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 	headData := make([]byte, common.HeaderLength)
 	_, err := io.ReadFull(conn, headData) // ReadFull 会把msg填充满为止
 	if err != nil {
-		fmt.Println("[Read] read header error", err)
+		log.Println("[Read] read header error", err)
 		return nil, err
 	}
 
 	header := bytes.NewReader(headData)
-	// fmt.Println(string(headData))
+	// log.Println(string(headData))
 
 	// 只解压head的信息，得到dataLen和msgID
 	var extLen, dataLen uint32
@@ -140,11 +141,11 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 	{
 		n, err := io.ReadFull(conn, codecType)
 		if err != nil {
-			fmt.Println("[Read] read codecType error", err)
+			log.Println("[Read] read codecType error", err)
 			return nil, err
 		}
 		if uint32(n) != 1 {
-			fmt.Println("[Read] read codecType len error")
+			log.Println("[Read] read codecType len error")
 			return nil, errors.New("read codecType error")
 		}
 	}
@@ -154,11 +155,11 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 	{
 		n, err := io.ReadFull(conn, extData)
 		if err != nil {
-			fmt.Println("[Read] read extData error", err)
+			log.Println("[Read] read extData error", err)
 			return nil, err
 		}
 		if uint32(n) != extLen {
-			fmt.Println("[Read] read extData len error")
+			log.Println("[Read] read extData len error")
 			return nil, errors.New("read extData error")
 		}
 	}
@@ -168,11 +169,11 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 	{
 		n, err := io.ReadFull(conn, data)
 		if err != nil {
-			fmt.Println("[Read] read date error", err)
+			log.Println("[Read] read date error", err)
 			return nil, err
 		}
 		if uint32(n) != dataLen {
-			fmt.Println("[Read] read data len error")
+			log.Println("[Read] read data len error")
 			return nil, errors.New("read extData error")
 		}
 	}

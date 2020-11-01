@@ -12,6 +12,7 @@ import (
 
 	"github.com/akkagao/gms/common"
 	"github.com/akkagao/gms/gmsContext"
+	"github.com/akkagao/gms/plugin"
 	"github.com/akkagao/gms/protocol"
 )
 
@@ -22,6 +23,16 @@ type server struct {
 	routerMap map[string]gmsContext.Controller
 	// gms 服务
 	gmsHandler *gmsHandler
+
+	// PluginGroup
+	plugins plugin.IPluginGroup
+}
+
+/**
+添加插件
+*/
+func (s *server) AddPlugin(plugin plugin.IPlugin) {
+	s.plugins.AddPlugin(plugin)
 }
 
 /*
@@ -29,6 +40,7 @@ type server struct {
 */
 func NewServer() IServer {
 	s := server{
+		plugins:   plugin.NewPluginGroup(),
 		routerMap: make(map[string]gmsContext.Controller),
 	}
 	return &s
@@ -38,7 +50,7 @@ func NewServer() IServer {
 准备启动服务的资源
 */
 func (s *server) InitServe(port int) {
-	fmt.Println("[gmsServer] InitServe")
+	log.Println("[gmsServer] InitServe")
 
 	pool := goroutine.Default()
 	defer pool.Release()
@@ -67,8 +79,14 @@ func (s *server) InitServe(port int) {
 /*
 启动服务
 */
-func (s *server) Run(port int) {
-	fmt.Println("[gmsServer] start run gms gmsServer")
+func (s *server) Run(ip string, port int) {
+	log.Println("[gmsServer] start run gms gmsServer")
+	// 启动所有插件
+	s.plugins.Start()
+
+	// 注册插件
+	s.plugins.Registe(ip, port)
+
 	// 准备启动服务的资源
 	s.InitServe(port)
 
@@ -78,7 +96,7 @@ func (s *server) Run(port int) {
 停止服务 回收资源
 */
 func (s *server) Stop() {
-	fmt.Println("[gmsServer] stop")
+	log.Println("[gmsServer] stop")
 }
 
 /*
@@ -87,8 +105,10 @@ func (s *server) Stop() {
 func (s *server) AddRouter(handlerName string, handlerFunc gmsContext.Controller) {
 	s.Lock()
 	defer s.Unlock()
+
+	// 注册路由
 	if _, ok := s.routerMap[handlerName]; ok {
-		fmt.Println("[AddRouter] fail handlerName:", handlerName, " alread exist")
+		log.Println("[AddRouter] fail handlerName:", handlerName, " alread exist")
 		return
 	}
 	s.routerMap[handlerName] = handlerFunc
@@ -112,10 +132,10 @@ func (s *server) GetRouter(handlerName string) (gmsContext.Controller, error) {
 // func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error) {
 // func (s *server) HandlerMessage(message protocol.Imessage) (gmsContext.Context, error) {
 func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error) {
-	// fmt.Println(string(message.GetExt()))
+	// log.Println(string(message.GetExt()))
 	controller, err := s.GetRouter(string(message.GetExt()))
 	if err != nil {
-		fmt.Println("[HandlerMessage] Router:", message.GetExt(), " not found", err)
+		log.Println("[HandlerMessage] Router:", message.GetExt(), " not found", err)
 		return nil, fmt.Errorf("No Router", err)
 	}
 
@@ -125,17 +145,17 @@ func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context,
 	// 调用方法
 	err = controller(context)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil, fmt.Errorf(" fail", err)
 	}
 
 	// resultData, err := context.GetResult()
 	// if err != nil {
-	// 	fmt.Println(err)
+	// 	log.Println(err)
 	// 	// todo 回写错误信息
 	// 	return nil, fmt.Errorf("", err)
 	// }
-	// fmt.Println(string(resultData))
+	// log.Println(string(resultData))
 	// todo 回写执行结果
 	return context, nil
 

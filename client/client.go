@@ -59,7 +59,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	// 把 request 序列化成字节数组
 	codecByte, err := codecReq.Encode(request)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	// 组装消息
@@ -69,7 +69,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	eb, err := c.messagePack.Pack(message)
 	if err != nil {
 		// 错误处理
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	// 发送打包好的消息
