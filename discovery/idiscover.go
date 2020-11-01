@@ -1,5 +1,5 @@
 package discovery
 
-type IDiscovery interface {
+type IDiscover interface {
 	GetServer() ([]string, error)
 }

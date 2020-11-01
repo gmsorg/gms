@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/connection"
@@ -12,7 +13,7 @@ import (
 )
 
 type Client struct {
-	discovery   discovery.IDiscovery
+	discovery   discovery.IDiscover
 	selector    selector.ISelector
 	connection  map[string]connection.IConnection
 	messagePack protocol.IMessagePack
@@ -22,7 +23,7 @@ type Client struct {
 /*
 NewClient 初始化客户端
 */
-func NewClient(discovery discovery.IDiscovery) (IClient, error) {
+func NewClient(discovery discovery.IDiscover) (IClient, error) {
 	client := &Client{
 		discovery:   discovery,
 		connection:  make(map[string]connection.IConnection),
