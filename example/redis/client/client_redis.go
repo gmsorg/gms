@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/akkagao/gms/client"
 	"github.com/akkagao/gms/codec"
@@ -33,12 +34,16 @@ func main() {
 	// 请求对象
 	req := &model.AdditionReq{NumberA: 10, NumberB: 20}
 	// 接收返回值的对象
-	res := &model.AdditionRes{}
 
-	// 调用服务
-	err = additionClient.Call("addition", req, res)
-	if err != nil {
-		log.Println(err)
+	for {
+		res := &model.AdditionRes{}
+		// 调用服务
+		err = additionClient.Call("addition", req, res)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(fmt.Sprintf("%d+%d=%d", req.NumberA, req.NumberB, res.Result))
+		time.Sleep(time.Second)
 	}
-	log.Println(fmt.Sprintf("%d+%d=%d", req.NumberA, req.NumberB, res.Result))
+
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/akkagao/gms"
 	"github.com/akkagao/gms/example/model"
 	"github.com/akkagao/gms/plugin/registe"
@@ -24,6 +26,7 @@ func main() {
 加法计算
 */
 func Addition(c *gmsContext.Context) error {
+	fmt.Println(1024)
 	additionReq := &model.AdditionReq{}
 	// 绑定请求参数
 	c.Param(additionReq)

@@ -77,11 +77,13 @@ func (r *RedisRegistePlugin) Registe(ip string, port int) error {
 	if r.UpdateInterval > 0 {
 		ticker := time.NewTicker(r.UpdateInterval)
 		go func() {
-			select {
-			case <-ticker.C:
-				err := r.registeService()
-				if err != nil {
-					log.Printf("[Registe] error: %v", err)
+			for {
+				select {
+				case <-ticker.C:
+					err := r.registeService()
+					if err != nil {
+						log.Printf("[Registe] error: %v", err)
+					}
 				}
 			}
 		}()

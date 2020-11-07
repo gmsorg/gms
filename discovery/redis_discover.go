@@ -69,7 +69,7 @@ func (r *RedisDiscover) watch() {
 		log.Fatalf("can't watch %v err:%v", nodeName, err)
 		return
 	}
-	
+
 	for {
 		select {
 		case kvPairs := <-watchTree:
@@ -88,7 +88,7 @@ func (r *RedisDiscover) loadService(kv store.Store) {
 	nodeName := fmt.Sprintf("%v/%v", common.BasePath, r.GmsServerName)
 	kvPairs, err := kv.List(nodeName, nil)
 	if err != nil {
-		log.Fatal("loadService error:", err)
+		log.Println("loadService error: ", err)
 		return
 	}
 

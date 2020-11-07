@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/akkagao/gms/codec"
@@ -13,7 +12,6 @@ import (
 )
 
 type Client struct {
-	discovery   discovery.IDiscover
 	selector    selector.ISelector
 	connection  map[string]connection.IConnection
 	messagePack protocol.IMessagePack
@@ -25,16 +23,12 @@ NewClient 初始化客户端
 */
 func NewClient(discovery discovery.IDiscover) (IClient, error) {
 	client := &Client{
-		discovery:   discovery,
 		connection:  make(map[string]connection.IConnection),
 		messagePack: protocol.NewMessagePack(),
 		codecType:   codec.Msgpack,
 	}
-	server, err := discovery.GetServer()
-	if err != nil {
-		return nil, fmt.Errorf("NewClient error %v", err)
-	}
-	client.selector = selector.NewRandomSelect(server)
+
+	client.selector = selector.NewRandomSelect(discovery)
 	return client, nil
 }
 
@@ -47,8 +41,8 @@ func (c *Client) SetCodecType(codecType codec.CodecType) error {
 }
 
 func (c *Client) Call(serviceFunc string, request interface{}, response interface{}) error {
-	serverKey := c.selector.Select()
-	if serverKey == "" {
+	serverKey, err := c.selector.Select()
+	if err != nil || serverKey == "" {
 		return errors.New("can't find server")
 	}
 

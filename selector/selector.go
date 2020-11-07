@@ -1,6 +1,6 @@
 package selector
 
 type ISelector interface {
-	Select() string // SelectFunc
+	Select() (string, error) // SelectFunc
 	// UpdateServer(servers map[string]string)
 }
