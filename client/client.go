@@ -84,7 +84,6 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 			// 如果是连接错误需要清除缓存的conn对象 并清除service
 			c.cleanConn(serverKey)
 		}
-
 		return err
 	}
 
