@@ -52,6 +52,14 @@ func NewRedisDiscover(serverName string, redisAddress []string) (IDiscover, erro
 	return redisDiscover, nil
 }
 
+func (r *RedisDiscover) DeleteServer(key string) {
+	for i := 0; i < len(r.address); i++ {
+		if key == r.address[i] {
+			r.address = append(r.address[:i], r.address[i+1:]...)
+		}
+	}
+}
+
 /**
 获取服务列表
 */

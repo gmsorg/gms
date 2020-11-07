@@ -6,6 +6,10 @@ type P2PDiscover struct {
 	address []string
 }
 
+func (p *P2PDiscover) DeleteServer(key string) {
+	panic("implement me")
+}
+
 /*
 NewP2PDiscover 初始化点对点服务发现
 */
