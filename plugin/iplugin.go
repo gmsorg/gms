@@ -1,6 +1,6 @@
 package plugin
 
-const BasePath = "gms"
+
 
 type IPluginGroup interface {
 	Start() error

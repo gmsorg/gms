@@ -9,6 +9,7 @@ import (
 	"github.com/abronan/valkeyrie/store"
 	"github.com/abronan/valkeyrie/store/redis"
 
+	"github.com/akkagao/gms/common"
 	"github.com/akkagao/gms/plugin"
 )
 
@@ -46,13 +47,13 @@ func (r *RedisRegistePlugin) Start() error {
 	}
 	r.kv = kv
 
-	err = r.kv.Put(plugin.BasePath, []byte(plugin.BasePath), &store.WriteOptions{IsDir: true})
+	err = r.kv.Put(common.BasePath, []byte(common.BasePath), &store.WriteOptions{IsDir: true})
 	if err != nil {
 		fmt.Errorf("[RedisRegistePlugin] put BasePath error: %v", err)
 		return err
 	}
 
-	nodeName := fmt.Sprintf("%v/%v", plugin.BasePath, r.GmsServerName)
+	nodeName := fmt.Sprintf("%v/%v", common.BasePath, r.GmsServerName)
 	err = r.kv.Put(nodeName, []byte(r.GmsServerName), &store.WriteOptions{IsDir: true})
 	if err != nil {
 		fmt.Errorf("[RedisRegistePlugin] put nodeName: %v error: %v", nodeName, err)
@@ -89,7 +90,7 @@ func (r *RedisRegistePlugin) Registe(ip string, port int) error {
 }
 
 func (r *RedisRegistePlugin) registeService() error {
-	nodeName := fmt.Sprintf("%v/%v/%v", plugin.BasePath, r.GmsServerName, r.GmsServiceAddress)
+	nodeName := fmt.Sprintf("%v/%v/%v", common.BasePath, r.GmsServerName, r.GmsServiceAddress)
 	err := r.kv.Put(nodeName, []byte(r.GmsServiceAddress), &store.WriteOptions{TTL: r.UpdateInterval * 2})
 	if err != nil {
 		return fmt.Errorf("[RedisRegistePlugin] put nodeName: %v error: %v", nodeName, err)
