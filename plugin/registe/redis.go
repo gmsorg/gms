@@ -25,10 +25,10 @@ func init() {
 	redis.Register()
 }
 
-func NewRedisRegistePlugin(serverName string, redisAddress []string) plugin.IPlugin {
+func NewRedisRegistePlugin(serverName string, redisAddress string) plugin.IPlugin {
 	return &RedisRegistePlugin{
 		GmsServerName:  serverName,
-		RedisAddress:   redisAddress,
+		RedisAddress:   []string{redisAddress},
 		UpdateInterval: time.Minute,
 	}
 }
@@ -42,7 +42,7 @@ func (r *RedisRegistePlugin) Start() error {
 		},
 	)
 	if err != nil {
-		log.Fatal("Cannot create store redis")
+		log.Fatal("Cannot create store redis", err)
 		return err
 	}
 	r.kv = kv

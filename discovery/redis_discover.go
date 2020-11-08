@@ -26,10 +26,11 @@ type RedisDiscover struct {
 	address           []string
 }
 
-func NewRedisDiscover(serverName string, redisAddress []string) (IDiscover, error) {
+func NewRedisDiscover(serverName string, redisAddress string) (IDiscover, error) {
+
 	kv, err := valkeyrie.NewStore(
 		store.REDIS,
-		redisAddress,
+		[]string{redisAddress},
 		&store.Config{
 			ConnectionTimeout: 10 * time.Second,
 		},
@@ -40,7 +41,7 @@ func NewRedisDiscover(serverName string, redisAddress []string) (IDiscover, erro
 
 	redisDiscover := &RedisDiscover{
 		GmsServerName: serverName,
-		RedisAddress:  redisAddress,
+		RedisAddress:  []string{redisAddress},
 		kv:            kv,
 		address:       []string{},
 	}

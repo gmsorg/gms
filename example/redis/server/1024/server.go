@@ -14,8 +14,8 @@ func main() {
 	// 添加业务处理路由（addition是业务处理方法的唯一标识，客户端调用需要使用）
 	gms.AddRouter("addition", Addition)
 
-	// 注册redis服务发现插件
-	gms.AddPlugin(registe.NewRedisRegistePlugin("gmsDemo", []string{"127.0.0.1:6379"}))
+	// 注册redis服务发现插件(redis 服务注册是单点)
+	gms.AddPlugin(registe.NewRedisRegistePlugin("gmsDemo", "127.0.0.1:6379"))
 
 	// 启动，以1024 为启动端口
 	gms.Run("127.0.0.1", 1024)

@@ -16,7 +16,7 @@ import (
 */
 func main() {
 	// 初始化一个点对点服务发现对象
-	discovery, err := discovery.NewRedisDiscover("gmsDemo", []string{"127.0.0.1:6379"})
+	discovery, err := discovery.NewRedisDiscover("gmsDemo", "127.0.0.1:6379")
 	if err != nil {
 		log.Fatal(err)
 	}
