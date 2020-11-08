@@ -9,51 +9,52 @@ import (
 
 	"github.com/abronan/valkeyrie"
 	"github.com/abronan/valkeyrie/store"
-	"github.com/abronan/valkeyrie/store/redis"
+	etcd "github.com/abronan/valkeyrie/store/etcd/v3"
 
 	"github.com/akkagao/gms/common"
 )
 
 func init() {
-	redis.Register()
+	etcd.Register()
 }
 
-type RedisDiscover struct {
+type Etcd3Discover struct {
 	GmsServerName     string
 	GmsServiceAddress []string
-	RedisAddress      []string
+	Etcd3Address      []string
 	kv                store.Store
 	address           []string
 }
 
-func NewRedisDiscover(serverName string, redisAddress string) (IDiscover, error) {
+func NewEtcd3Discover(serverName string, etcd3Address []string) (IDiscover, error) {
 
 	kv, err := valkeyrie.NewStore(
-		store.REDIS,
-		[]string{redisAddress},
+		store.ETCDV3,
+		etcd3Address,
 		&store.Config{
 			ConnectionTimeout: 10 * time.Second,
 		},
 	)
+
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("[NewRedisDiscover] error: %v", err))
+		return nil, errors.New(fmt.Sprintf("[NewEtcd3Discover] error: %v", err))
 	}
 
-	redisDiscover := &RedisDiscover{
+	etcd3Discover := &Etcd3Discover{
 		GmsServerName: serverName,
-		RedisAddress:  []string{redisAddress},
+		Etcd3Address:  etcd3Address,
 		kv:            kv,
 		address:       []string{},
 	}
 
-	redisDiscover.loadService(kv)
+	etcd3Discover.loadService()
 
-	go redisDiscover.watch()
+	go etcd3Discover.watch()
 
-	return redisDiscover, nil
+	return etcd3Discover, nil
 }
 
-func (r *RedisDiscover) DeleteServer(key string) {
+func (r *Etcd3Discover) DeleteServer(key string) {
 	for i := 0; i < len(r.address); i++ {
 		if key == r.address[i] {
 			r.address = append(r.address[:i], r.address[i+1:]...)
@@ -64,14 +65,14 @@ func (r *RedisDiscover) DeleteServer(key string) {
 /**
 获取服务列表
 */
-func (r *RedisDiscover) GetServer() ([]string, error) {
+func (r *Etcd3Discover) GetServer() ([]string, error) {
 	if r.address == nil || len(r.address) == 0 {
 		return nil, errors.New("no server list")
 	}
 	return r.address, nil
 }
 
-func (r *RedisDiscover) watch() {
+func (r *Etcd3Discover) watch() {
 	nodeName := fmt.Sprintf("%v/%v", common.BasePath, r.GmsServerName)
 	watchTree, err := r.kv.WatchTree(nodeName, nil, nil)
 	if err != nil {
@@ -81,23 +82,26 @@ func (r *RedisDiscover) watch() {
 
 	for {
 		select {
-		case kvPairs := <-watchTree:
-			fmt.Println("watching ...")
-			address := []string{}
-			for _, pair := range kvPairs {
-				serverAddress := strings.TrimPrefix(pair.Key, nodeName+"/")
-				address = append(address, serverAddress)
-			}
-			r.address = address
+		case <-watchTree:
+			// case kvPairs := <-watchTree:
+			// fmt.Println("watching ...", len(kvPairs))
+			// address := []string{}
+			// for _, pair := range kvPairs {
+			// 	serverAddress := strings.TrimPrefix(pair.Key, nodeName+"/")
+			// 	address = append(address, serverAddress)
+			// }
+			// r.address = address
+			r.loadService()
 		}
 	}
 }
 
-func (r *RedisDiscover) loadService(kv store.Store) {
+func (r *Etcd3Discover) loadService() {
+	// nodeName := common.BasePath
 	nodeName := fmt.Sprintf("%v/%v", common.BasePath, r.GmsServerName)
-	kvPairs, err := kv.List(nodeName, nil)
+	kvPairs, err := r.kv.List(nodeName, nil)
 	if err != nil {
-		log.Println("loadService error: ", err)
+		log.Println("[Etcd3Discover] loadService error: ", err)
 		return
 	}
 
