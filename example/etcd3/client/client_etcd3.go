@@ -16,7 +16,7 @@ import (
 */
 func main() {
 	// 初始化一个点对点服务发现对象
-	discovery, err := discovery.NewRedisDiscover("gmsDemo", "127.0.0.1:6379")
+	discovery, err := discovery.NewEtcd3Discover("gmsDemo", []string{"127.0.0.1:2379"})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,4 +46,5 @@ func main() {
 		}
 		log.Println(fmt.Sprintf("%d+%d=%d", req.NumberA, req.NumberB, res.Result))
 	}
+
 }

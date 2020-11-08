@@ -56,6 +56,11 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	if connection == nil {
 		connection = c.generateClient(serverKey)
 	}
+	if connection == nil {
+		// 如果是连接错误需要清除缓存的conn对象 并清除service
+		c.cleanConn(serverKey)
+		return errors.New("[Client.Call] generateClient fail")
+	}
 
 	// 获取指定的序列化器
 	codecReq := codec.GetCodec(c.codecType)

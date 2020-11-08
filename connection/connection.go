@@ -29,8 +29,13 @@ func NewConnection(address string) IConnection {
 }
 
 func (c *Connection) Send(reqData []byte) error {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("[Connection.Send]recover send data error:%v", err)
+		}
+	}()
 	if c.conn == nil {
-		return errors.New("[Send] conn not exist")
+		return errors.New("[Connection.Send] conn not exist")
 	}
 	_, err := c.conn.Write(reqData)
 	return err
