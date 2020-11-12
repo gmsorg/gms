@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"fmt"
+	"log"
 	"testing"
 
 	"github.com/akkagao/gms/codec"
