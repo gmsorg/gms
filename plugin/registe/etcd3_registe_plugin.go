@@ -80,7 +80,7 @@ func (e *Etcd3RegistePlugin) Registe(ip string, port int) error {
 				case <-ticker.C:
 					err := e.registeService()
 					if err != nil {
-						log.Printf("[Registe] error: %v", err)
+						log.Printf("[Etcd3RegistePlugin] error: %v", err)
 					}
 				}
 			}
@@ -93,7 +93,7 @@ func (e *Etcd3RegistePlugin) registeService() error {
 	nodeName := fmt.Sprintf("%v/%v/%v", common.BasePath, e.GmsServerName, e.GmsServiceAddress)
 	err := e.kv.Put(nodeName, []byte(e.GmsServiceAddress), &store.WriteOptions{TTL: e.UpdateInterval * 2})
 	if err != nil {
-		return fmt.Errorf("[RedisRegistePlugin] put nodeName: %v error: %v", nodeName, err)
+		return fmt.Errorf("[Etcd3RegistePlugin] put nodeName: %v error: %v", nodeName, err)
 	}
 	return nil
 }

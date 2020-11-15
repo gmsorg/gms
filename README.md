@@ -8,7 +8,7 @@
 
 ​	GMS是一个非常简单易用的微服务框架。只要您之前使用过类似Gin、beego这样的web框架。就能快速上手，使用方法和这些web框架一样简单。不用额外编写类似proto等额外的接口协议。
 
-​	GMS的网络同信层使用[gnet](https://github.com/panjf2000/gnet) ，基于gnet的优异性能GMS也会表现不俗
+​	GMS的网络通信层使用[gnet](https://github.com/panjf2000/gnet) ，基于gnet的优异性能GMS也会表现不俗
 
 ## 特点：
 
@@ -20,7 +20,7 @@
 
 ## 缺点：
 
-- 目前很多功能还没有完善，不建议应用再公司项目中。
+- 目前很多功能还没有完善，不建议应用在公司项目中。
 
 
 
@@ -135,15 +135,22 @@ func main() {
 
 ```
 
+## 特别鸣谢
 
+感谢以下开源项目作者的辛苦付出
+
+[github.com/panjf2000/gnet](https://github.com/panjf2000/gnet)
+[github.com/abronan/valkeyrie](https://github.com/abronan/valkeyrie)
+[github.com/satori/go.uuid](https://github.com/satori/go.uuid)
+[github.com/vmihailenco/msgpack](https://github.com/vmihailenco/msgpack)
 
 ## TODO List
 
 - [x] 1 服务端支持 客户端指定序列化方式 
-- [ ] 2 服务注册&服务发现
+- [x] 2 服务注册&服务发现
   - [x] redis 注册中心&服务发现
   - [x] etcd3 注册中心&服务发现
-  - [ ] consul 注册中心&服务发现
+  - [x] consul 注册中心&服务发现
 - [ ] 流控
 - [ ] 熔断
 - [ ] 监控统计
