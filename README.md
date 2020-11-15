@@ -8,7 +8,7 @@
 
 ​	GMS是一个非常简单易用的微服务框架。只要您之前使用过类似Gin、beego这样的web框架。就能快速上手，使用方法和这些web框架一样简单。不用额外编写类似proto等额外的接口协议。
 
-​	GMS的网络同信层使用[gnet](https://github.com/panjf2000/gnet) ，基于gnet的优异性能GMS也会表现不俗
+​	GMS的网络通信层使用[gnet](https://github.com/panjf2000/gnet) ，基于gnet的优异性能GMS也会表现不俗
 
 ## 特点：
 
