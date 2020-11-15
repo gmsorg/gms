@@ -84,7 +84,7 @@ func (r *Etcd3Discover) watch() {
 		select {
 		case <-watchTree:
 			// case kvPairs := <-watchTree:
-			// fmt.Println("watching ...", len(kvPairs))
+			// log.Println("watching ...", len(kvPairs))
 			// address := []string{}
 			// for _, pair := range kvPairs {
 			// 	serverAddress := strings.TrimPrefix(pair.Key, nodeName+"/")

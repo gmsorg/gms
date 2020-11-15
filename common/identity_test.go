@@ -1,7 +1,7 @@
 package common
 
 import (
-	"fmt"
+	"log"
 	"testing"
 )
 

@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"testing"
@@ -29,12 +28,12 @@ func TestNewRedisDiscover(t *testing.T) {
 	for {
 		select {
 		case <-timeout.C:
-			fmt.Println("---")
+			log.Println("---")
 			rand.Seed(time.Now().UnixNano())
 			registePlugin.Registe("127.0.0.1", rand.Intn(1000))
 			assert.NoError(t, err)
 
-			fmt.Println(discover.GetServer())
+			log.Println(discover.GetServer())
 		}
 	}
 

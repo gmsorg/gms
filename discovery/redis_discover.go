@@ -82,7 +82,7 @@ func (r *RedisDiscover) watch() {
 	for {
 		select {
 		case kvPairs := <-watchTree:
-			fmt.Println("watching ...")
+			log.Println("watching ...")
 			address := []string{}
 			for _, pair := range kvPairs {
 				serverAddress := strings.TrimPrefix(pair.Key, nodeName+"/")

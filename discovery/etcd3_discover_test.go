@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"testing"
@@ -24,18 +23,18 @@ func TestNewEtcd3Discover(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(discover.GetServer())
+	log.Println(discover.GetServer())
 
 	timeout := time.NewTicker(1 * time.Second)
 	for {
 		select {
 		case <-timeout.C:
-			fmt.Println("---")
+			log.Println("---")
 			rand.Seed(time.Now().UnixNano())
 			registePlugin.Registe("127.0.0.1", rand.Intn(1000))
 			assert.NoError(t, err)
 
-			fmt.Println(discover.GetServer())
+			log.Println(discover.GetServer())
 		}
 	}
 
@@ -53,13 +52,13 @@ func TestNewEtcd3Discover2(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(discover.GetServer())
+	log.Println(discover.GetServer())
 
 	timeout := time.NewTicker(1 * time.Second)
 	for {
 		select {
 		case <-timeout.C:
-			fmt.Println(discover.GetServer())
+			log.Println(discover.GetServer())
 		}
 	}
 

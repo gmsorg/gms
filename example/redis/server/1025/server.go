@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/akkagao/gms"
 	"github.com/akkagao/gms/example/model"
@@ -26,7 +26,7 @@ func main() {
 加法计算
 */
 func Addition(c *gmsContext.Context) error {
-	fmt.Println(1025)
+	log.Println(1025)
 	additionReq := &model.AdditionReq{}
 	// 绑定请求参数
 	c.Param(additionReq)
