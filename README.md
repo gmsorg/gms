@@ -52,25 +52,21 @@ package main
 
 import (
 	"github.com/akkagao/gms"
-
+	"github.com/akkagao/gms/example/model"
 	"github.com/akkagao/gms/gmsContext"
-
-	"example/model"
 )
 
 func main() {
-	// 初始化GMS服务
-	gms := gms.NewGms()
-
 	// 添加业务处理路由（addition是业务处理方法的唯一标识，客户端调用需要使用）
 	gms.AddRouter("addition", Addition)
 
 	// 启动，以1024 为启动端口
-	gms.Run(1024)
+	gms.Run("127.0.0.1", 1024)
+	// gms.DefaultRun()
 }
 
 /*
-加法计算（业务实现方法）
+加法计算
 */
 func Addition(c *gmsContext.Context) error {
 	additionReq := &model.AdditionReq{}
@@ -85,7 +81,6 @@ func Addition(c *gmsContext.Context) error {
 	c.Result(additionRes)
 	return nil
 }
-
 ```
 
 ### 3：开发客户端
@@ -95,20 +90,20 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/akkagao/gms/client"
 	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/discovery"
-
-	"example/model"
+	"github.com/akkagao/gms/example/model"
 )
 
 /*
-	模拟客户端
+客户端
 */
 func main() {
 	// 初始化一个点对点服务发现对象
-	discovery := discovery.NewP2PDiscovery("127.0.0.1:1024")
+	discovery := discovery.NewP2PDiscover([]string{"127.0.0.1:1024"})
 
 	// 初始化一个客户端对象
 	additionClient, err := client.NewClient(discovery)
@@ -132,7 +127,6 @@ func main() {
 	}
 	log.Println(fmt.Sprintf("%d+%d=%d", req.NumberA, req.NumberB, res.Result))
 }
-
 ```
 
 ## 特别鸣谢
