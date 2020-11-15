@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -84,7 +83,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	// 发送打包好的消息
 	err = connection.Send(eb)
 	if err != nil {
-		fmt.Println("call-error:", err)
+		log.Println("call-error:", err)
 		if netError(err) {
 			// 如果是连接错误需要清除缓存的conn对象 并清除service
 			c.cleanConn(serverKey)

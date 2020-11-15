@@ -1,7 +1,7 @@
 package codec
 
 import (
-	"fmt"
+	"log"
 	"testing"
 )
 
