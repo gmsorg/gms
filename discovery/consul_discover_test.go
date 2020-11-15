@@ -10,30 +10,28 @@ import (
 	"github.com/akkagao/gms/plugin/registe"
 )
 
-func TestNewRedisDiscover(t *testing.T) {
-	plugins := registe.NewRedisRegistePlugin("gmsDemo", "127.0.0.1:6379")
+func TestNewConsulDiscover(t *testing.T) {
+	plugins := registe.NewConsulRegistePlugin("gmsDemo", []string{"localhost:8500"})
 	plugins.Start()
 
 	registePlugin := plugins.(plugin.IRegistePlugin)
 	registePlugin.Registe("127.0.0.1", 1024)
 
-	discover, err := NewRedisDiscover("gmsDemo", "127.0.0.1:6379")
+	discover, err := NewConsulDiscover("gmsDemo", []string{"localhost:8500"})
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println(discover.GetServer())
 
 	timeout := time.NewTicker(1 * time.Second)
 	for {
 		select {
 		case <-timeout.C:
-			log.Println("---")
-			rand.Seed(time.Now().UnixNano())
-			registePlugin.Registe("127.0.0.1", rand.Intn(1000))
-
 			log.Println(discover.GetServer())
+			rand.Seed(time.Now().UnixNano())
+			// registePlugin.Registe("127.0.0.1", rand.Intn(6000)+1024)
 		}
 	}
 
 	select {}
-
 }

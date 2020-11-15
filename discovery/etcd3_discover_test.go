@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/akkagao/gms/plugin"
 	"github.com/akkagao/gms/plugin/registe"
 )
@@ -32,7 +30,6 @@ func TestNewEtcd3Discover(t *testing.T) {
 			log.Println("---")
 			rand.Seed(time.Now().UnixNano())
 			registePlugin.Registe("127.0.0.1", rand.Intn(1000))
-			assert.NoError(t, err)
 
 			log.Println(discover.GetServer())
 		}

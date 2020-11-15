@@ -135,15 +135,22 @@ func main() {
 
 ```
 
+## 特别鸣谢
 
+感谢以下开源项目作者的辛苦付出
+
+[github.com/panjf2000/gnet](https://github.com/panjf2000/gnet)
+[github.com/abronan/valkeyrie](https://github.com/abronan/valkeyrie)
+[github.com/satori/go.uuid](https://github.com/satori/go.uuid)
+[github.com/vmihailenco/msgpack](https://github.com/vmihailenco/msgpack)
 
 ## TODO List
 
 - [x] 1 服务端支持 客户端指定序列化方式 
-- [ ] 2 服务注册&服务发现
+- [x] 2 服务注册&服务发现
   - [x] redis 注册中心&服务发现
   - [x] etcd3 注册中心&服务发现
-  - [ ] consul 注册中心&服务发现
+  - [x] consul 注册中心&服务发现
 - [ ] 流控
 - [ ] 熔断
 - [ ] 监控统计
