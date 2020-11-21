@@ -29,13 +29,21 @@ func main() {
 
 	// 请求对象
 	req := &model.AdditionReq{NumberA: 10, NumberB: 20}
-	// 接收返回值的对象
-	res := &model.AdditionRes{}
 
-	// 调用服务
-	err = additionClient.Call("addition", req, res)
-	if err != nil {
-		log.Println(err)
+	for i := 0; i < 10; i++ {
+		go func(i int) {
+			for j := 0; j < 100; j++ {
+				// 接收返回值的对象
+				res := &model.AdditionRes{}
+
+				// 调用服务
+				err = additionClient.Call("addition", req, res)
+				if err != nil {
+					log.Println(err)
+				}
+				log.Println(fmt.Sprintf("%v-%v :%d+%d=%d", i, j, req.NumberA, req.NumberB, res.Result))
+			}
+		}(i)
 	}
-	log.Println(fmt.Sprintf("%d+%d=%d", req.NumberA, req.NumberB, res.Result))
+	select {}
 }

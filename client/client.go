@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -50,6 +51,9 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	if err != nil || serverKey == "" {
 		return errors.New("can't find server")
 	}
+
+	c.rw.Lock()
+	defer c.rw.Unlock()
 
 	connection := c.getCachedConnection(serverKey)
 	if connection == nil {
@@ -114,20 +118,24 @@ func netError(err error) bool {
 }
 
 func (c *Client) getCachedConnection(address string) connection.IConnection {
-	c.rw.RLock()
-	defer c.rw.RUnlock()
+	// c.rw.RLock()
+	// defer c.rw.RUnlock()
 	if connection, ok := c.connection[address]; ok {
+		fmt.Println("get ok", ok)
 		return connection
 	}
 	return nil
 }
 
 func (c *Client) generateClient(address string) connection.IConnection {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	// c.rw.Lock()
+	// defer c.rw.Unlock()
 
 	newConnection := connection.NewConnection(address)
 	c.connection[address] = newConnection
+	log.Println("XXXXXX", address, newConnection, "XXXXXX")
+	log.Println(c.connection)
+	log.Println("XXXXXX", address, newConnection, "XXXXXX")
 	return newConnection
 }
 

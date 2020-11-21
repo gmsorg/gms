@@ -134,8 +134,11 @@ func main() {
 感谢以下开源项目作者的辛苦付出
 
 [github.com/panjf2000/gnet](https://github.com/panjf2000/gnet)
+
 [github.com/abronan/valkeyrie](https://github.com/abronan/valkeyrie)
+
 [github.com/satori/go.uuid](https://github.com/satori/go.uuid)
+
 [github.com/vmihailenco/msgpack](https://github.com/vmihailenco/msgpack)
 
 ## TODO List
