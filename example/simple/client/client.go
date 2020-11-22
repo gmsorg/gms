@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
+	"sync"
+	"time"
 
 	"github.com/akkagao/gms/client"
 	"github.com/akkagao/gms/codec"
@@ -28,11 +31,16 @@ func main() {
 	additionClient.SetCodecType(codec.Msgpack)
 
 	// 请求对象
-	req := &model.AdditionReq{NumberA: 10, NumberB: 20}
+	start := time.Now()
 
-	for i := 0; i < 10; i++ {
+	waitGroup := sync.WaitGroup{}
+	for i := 0; i < 2; i++ {
+		waitGroup.Add(1)
 		go func(i int) {
-			for j := 0; j < 100; j++ {
+			for j := 0; j < 1; j++ {
+				rand.Seed(time.Now().UnixNano())
+				req := &model.AdditionReq{NumberA: rand.Intn(100), NumberB: rand.Intn(200)}
+
 				// 接收返回值的对象
 				res := &model.AdditionRes{}
 
@@ -43,7 +51,10 @@ func main() {
 				}
 				log.Println(fmt.Sprintf("%v-%v :%d+%d=%d", i, j, req.NumberA, req.NumberB, res.Result))
 			}
+			waitGroup.Done()
 		}(i)
 	}
-	select {}
+	waitGroup.Wait()
+
+	fmt.Println(time.Since(start))
 }
