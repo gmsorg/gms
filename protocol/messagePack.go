@@ -4,12 +4,10 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net"
 
-	"github.com/akkagao/gms/codec"
 	"github.com/akkagao/gms/common"
 )
 
@@ -35,37 +33,62 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 
 	buffer := bytes.NewBuffer(result)
 
-	if err := binary.Write(buffer, binary.BigEndian, message.GetExtLen()); err != nil {
-		s := fmt.Sprintf("[Pack] Pack extLen error , %v", err)
-		return nil, errors.New(s)
+	if err := binary.Write(buffer, binary.BigEndian, message.GetHeader()); err != nil {
+		return nil, err
 	}
 
-	if err := binary.Write(buffer, binary.BigEndian, message.GetDataLen()); err != nil {
-		s := fmt.Sprintf("[Pack] Pack dataLen error , %v", err)
-		return nil, errors.New(s)
-	}
+	extData := encodeExt(message.GetExt())
 
-	if err := binary.Write(buffer, binary.BigEndian, message.GetCodecType()); err != nil {
-		s := fmt.Sprintf("[Pack] Pack GetCodecType error , %v", err)
-		return nil, errors.New(s)
-	}
 
-	if message.GetExtLen() > 0 {
-		if err := binary.Write(buffer, binary.BigEndian, message.GetExt()); err != nil {
-			s := fmt.Sprintf("[Pack] Pack ext error , %v", err)
-			return nil, errors.New(s)
-		}
-	}
-
-	if message.GetDataLen() > 0 {
-		if err := binary.Write(buffer, binary.BigEndian, message.GetData()); err != nil {
-			s := fmt.Sprintf("[Pack] Pack data error , %v", err)
-			return nil, errors.New(s)
-		}
-	}
+	// if err := binary.Write(buffer, binary.BigEndian, message.GetExtLen()); err != nil {
+	// 	s := fmt.Sprintf("[Pack] Pack extLen error , %v", err)
+	// 	return nil, errors.New(s)
+	// }
+	//
+	// if err := binary.Write(buffer, binary.BigEndian, message.GetDataLen()); err != nil {
+	// 	s := fmt.Sprintf("[Pack] Pack dataLen error , %v", err)
+	// 	return nil, errors.New(s)
+	// }
+	//
+	// if err := binary.Write(buffer, binary.BigEndian, message.GetCodecType()); err != nil {
+	// 	s := fmt.Sprintf("[Pack] Pack GetCodecType error , %v", err)
+	// 	return nil, errors.New(s)
+	// }
+	//
+	// if message.GetExtLen() > 0 {
+	// 	if err := binary.Write(buffer, binary.BigEndian, message.GetExt()); err != nil {
+	// 		s := fmt.Sprintf("[Pack] Pack ext error , %v", err)
+	// 		return nil, errors.New(s)
+	// 	}
+	// }
+	//
+	// if message.GetDataLen() > 0 {
+	// 	if err := binary.Write(buffer, binary.BigEndian, message.GetData()); err != nil {
+	// 		s := fmt.Sprintf("[Pack] Pack data error , %v", err)
+	// 		return nil, errors.New(s)
+	// 	}
+	// }
 
 	// log.Println(string(buffer.Bytes()))
 	return buffer.Bytes(), nil
+}
+
+// len,string,len,string,......
+func encodeExt(m map[string]string) []byte {
+	if len(m) == 0 {
+		return []byte{}
+	}
+	var buf bytes.Buffer
+	var d = make([]byte, 4)
+	for k, v := range m {
+		binary.BigEndian.PutUint32(d, uint32(len(k)))
+		buf.Write(d)
+		buf.Write(common.StringToSliceByte(k))
+		binary.BigEndian.PutUint32(d, uint32(len(v)))
+		buf.Write(d)
+		buf.Write(common.StringToSliceByte(v))
+	}
+	return buf.Bytes()
 }
 
 /*
@@ -89,23 +112,24 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 		return nil, err
 	}
 
-	msg := &Message{
-		extLen:  extLen,
-		dataLen: dataLen,
-		count:   common.HeaderLength + extLen + dataLen + 1,
-	}
-
-	codecType := binaryMessage[common.HeaderLength : common.HeaderLength+1]
-	msg.codecType = codec.CodecType(codecType[0])
-
-	// 截取消息头后的所有内容
-	content := binaryMessage[common.HeaderLength+1 : msg.GetCount()]
-
-	// 获取扩展消息
-	msg.SetExt(content[:msg.GetExtLen()])
-	// 获取消息内容
-	msg.SetData(content[msg.GetExtLen():])
-	return msg, nil
+	// msg := &Message{
+	// 	extLen:  extLen,
+	// 	dataLen: dataLen,
+	// 	count:   common.HeaderLength + extLen + dataLen + 1,
+	// }
+	//
+	// codecType := binaryMessage[common.HeaderLength : common.HeaderLength+1]
+	// msg.codecType = codec.CodecType(codecType[0])
+	//
+	// // 截取消息头后的所有内容
+	// content := binaryMessage[common.HeaderLength+1 : msg.GetCount()]
+	//
+	// // 获取扩展消息
+	// msg.SetExt(content[:msg.GetExtLen()])
+	// // 获取消息内容
+	// msg.SetData(content[msg.GetExtLen():])
+	// return msg, nil
+	return nil, nil
 }
 
 func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
@@ -132,9 +156,9 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 	}
 
 	msg := &Message{
-		extLen:  extLen,
-		dataLen: dataLen,
-		count:   common.HeaderLength + extLen + dataLen + 1,
+		// extLen:  extLen,
+		// dataLen: dataLen,
+		// count:   common.HeaderLength + extLen + dataLen + 1,
 	}
 
 	codecType := make([]byte, 1)
@@ -179,9 +203,9 @@ func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
 	}
 
 	// 设置编码类型
-	msg.SetCodecType(codec.CodecType(codecType[0]))
-	// 获取扩展消息
-	msg.SetExt(extData)
+	// msg.SetCodecType(codec.CodecType(codecType[0]))
+	// // 获取扩展消息
+	// msg.SetExt(extData)
 	// 获取消息内容
 	msg.SetData(data)
 	return msg, nil

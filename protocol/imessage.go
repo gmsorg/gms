@@ -1,6 +1,8 @@
 package protocol
 
-import "github.com/akkagao/gms/codec"
+import (
+	"github.com/akkagao/gms/codec"
+)
 
 /*
 Imessage 请求消息和返回消息体封装
@@ -14,29 +16,41 @@ Imessage 请求消息和返回消息体封装
 返回消息 扩展信息作为：请求成功失败的描述
 */
 type Imessage interface {
-	// 设置扩展数据的长度
-	SetExtLen(extLen uint32)
-	// 获取扩展数据的长度
-	GetExtLen() uint32
+	GetHeader() Header
+
+	CheckMagicNumber() bool
+
+	Version() byte
+
+	SetVersion(v byte)
+
+	MessageType() MessageType
+
+	SetMessageType(mt MessageType)
+
+	// 获取消息压缩类型
+	CompressType() CompressType
+
+	// 设置消息压缩类型
+	SetCompressType(ct CompressType)
+
+	// 获取序列化类型
+	SerializeType() codec.CodecType
+	// 设置序列化类型
+	SetSerializeType(ct codec.CodecType)
+
+	// 获取消息序号
+	Seq() uint64
+	// 设置消息序号
+	SetSeq(seq uint64)
+
 	// 设置扩展数据
-	SetExt(ext []byte)
+	SetExt(ext map[string]string)
 	// 获取扩展数据
-	GetExt() []byte
+	GetExt() map[string]string
 
-	// 设置编码方式
-	SetCodecType(codecType codec.CodecType)
-	// 获取编码方式
-	GetCodecType() codec.CodecType
-
-	// 设置主体数据段长度
-	SetDataLen(dataLen uint32)
-	// 获取主体数据段长度
-	GetDataLen() uint32
 	// 设置主体数据内容
 	SetData(data []byte)
 	// 获取主体数据内容
 	GetData() []byte
-
-	// 获取消息总长度
-	GetCount() uint32
 }

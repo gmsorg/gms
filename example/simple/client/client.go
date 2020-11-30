@@ -34,7 +34,7 @@ func main() {
 	start := time.Now()
 
 	waitGroup := sync.WaitGroup{}
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 20; i++ {
 		waitGroup.Add(1)
 		go func(i int) {
 			for j := 0; j < 1; j++ {

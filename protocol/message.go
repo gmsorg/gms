@@ -1,87 +1,111 @@
 package protocol
 
 import (
+	"encoding/binary"
+
 	"github.com/akkagao/gms/codec"
-	"github.com/akkagao/gms/common"
 )
 
 /*
 Message 请求消息和返回消息体封装
 */
 type Message struct {
-	extLen    uint32
-	ext       []byte
-	codecType codec.CodecType
-	dataLen   uint32
-	data      []byte
-	count     uint32
+	Header
+	serviceFunc string
+	ext         map[string]string
+	data        []byte
 }
 
 /*
 NewMessage 初始化消息方法
 */
-func NewMessage(ext, data []byte, codecType codec.CodecType) Imessage {
-	return &Message{
-		extLen:    uint32(len(ext)),
-		ext:       ext,
-		codecType: codecType,
-		dataLen:   uint32(len(data)),
-		data:      data,
-		// count= 消息头长度（描述扩展信息和消息数据的长度信息）+ 扩展信息的长度+消息长度+编码方式信息长度（1一个字节）
-		count: common.HeaderLength + uint32(len(ext)) + uint32(len(data)) + 1,
+func NewMessage() Imessage {
+	header := Header{}
+
+	message := &Message{
+		Header: header,
+		ext:    make(map[string]string),
 	}
+	message.setMagicNumber()
+
+	return message
 }
 
-/*
-SetExtLen 设置扩展信息长度
-*/
-func (m *Message) SetExtLen(extLen uint32) {
-	m.extLen = extLen
+func (m *Message) GetHeader() Header {
+	return m.Header
 }
 
-/*
-GetExtLen 获取扩展数据的长度
-*/
-func (m *Message) GetExtLen() uint32 {
-	return m.extLen
+func (m *Message) setMagicNumber() {
+	m.Header[0] = magicNumber
+}
+
+// CheckMagicNumber checks whether header starts rpcx magic number.
+func (m *Message) CheckMagicNumber() bool {
+	return m.Header[0] == magicNumber
+}
+
+// Version returns version of rpcx protocol.
+func (m *Message) Version() byte {
+	return m.Header[1]
+}
+
+// SetVersion sets version for this header.
+func (m *Message) SetVersion(v byte) {
+	m.Header[1] = v
+}
+
+// MessageType returns the message type.
+func (m *Message) MessageType() MessageType {
+	return MessageType(m.Header[2])
+}
+
+// SetMessageType sets message type.
+func (m *Message) SetMessageType(mt MessageType) {
+	m.Header[2] = byte(mt)
+}
+
+// CompressType returns compression type of messages.
+func (m *Message) CompressType() CompressType {
+	return CompressType((m.Header[3]))
+}
+
+// SetCompressType sets the compression type.
+func (m *Message) SetCompressType(ct CompressType) {
+	m.Header[3] = byte(ct)
+}
+
+// SerializeType returns serialization type of payload.
+func (m *Message) SerializeType() codec.CodecType {
+	return codec.CodecType((m.Header[4]))
+}
+
+// SetSerializeType sets the serialization type.
+func (m *Message) SetSerializeType(ct codec.CodecType) {
+	m.Header[4] = byte(ct)
+}
+
+// Seq returns sequence number of messages.
+func (m *Message) Seq() uint64 {
+	return binary.BigEndian.Uint64(m.Header[5:])
+}
+
+// SetSeq sets  sequence number.
+func (m *Message) SetSeq(seq uint64) {
+	binary.BigEndian.PutUint64(m.Header[5:], seq)
 }
 
 /*
 SetExt 设置扩展数据
 */
-func (m *Message) SetExt(ext []byte) {
+func (m *Message) SetExt(ext map[string]string) {
 	m.ext = ext
 }
 
 /*
 GetExt 获取扩展数据
 */
-func (m *Message) GetExt() []byte {
+func (m *Message) GetExt() map[string]string {
 	return m.ext
-}
-
-// 设置编码方式
-func (m *Message) SetCodecType(codecType codec.CodecType) {
-	m.codecType = codecType
-}
-
-// 获取编码方式
-func (m *Message) GetCodecType() codec.CodecType {
-	return m.codecType
-}
-
-/*
-SetDataLen 设置主体数据段长度
-*/
-func (m *Message) SetDataLen(dataLen uint32) {
-	m.dataLen = dataLen
-}
-
-/*
-GetDataLen 获取主体数据段长度
-*/
-func (m *Message) GetDataLen() uint32 {
-	return m.dataLen
 }
 
 /*
@@ -96,11 +120,4 @@ GetData 获取主体数据内容
 */
 func (m *Message) GetData() []byte {
 	return m.data
-}
-
-/*
-GetCount 获取消息总长度
-*/
-func (m *Message) GetCount() uint32 {
-	return m.count
 }

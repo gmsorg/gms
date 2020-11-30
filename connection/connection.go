@@ -14,6 +14,7 @@ import (
 type Connection struct {
 	conn        net.Conn
 	messagePack protocol.IMessagePack
+	seq         int64
 }
 
 func NewConnection(address string) IConnection {
