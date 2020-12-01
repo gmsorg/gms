@@ -94,6 +94,16 @@ func (m *Message) SetSeq(seq uint64) {
 	binary.BigEndian.PutUint64(m.Header[5:], seq)
 }
 
+// 获取请求方法名
+func (m *Message) ServiceFunc() string {
+	return m.serviceFunc
+}
+
+// 设置请求方法名
+func (m *Message) SetServiceFunc(serviceFunc string) {
+	m.serviceFunc = serviceFunc
+}
+
 /*
 SetExt 设置扩展数据
 */

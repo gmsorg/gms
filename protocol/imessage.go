@@ -44,6 +44,11 @@ type Imessage interface {
 	// 设置消息序号
 	SetSeq(seq uint64)
 
+	// 获取请求方法名
+	ServiceFunc() string
+	// 设置请求方法名
+	SetServiceFunc(serviceFunc string)
+
 	// 设置扩展数据
 	SetExt(ext map[string]string)
 	// 获取扩展数据

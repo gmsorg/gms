@@ -1,5 +1,7 @@
 package protocol
 
+import "github.com/akkagao/gms/common"
+
 const (
 	magicNumber byte = 0x88
 )
@@ -29,4 +31,4 @@ const (
 	Gzip
 )
 
-type Header [13]byte
+type Header [common.HeaderLength]byte

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -37,39 +38,47 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 		return nil, err
 	}
 
+	serviceFuncL := len(message.ServiceFunc())
+
 	extData := encodeExt(message.GetExt())
+	extDataL := len(extData)
 
+	data := message.GetData()
+	dataL := len(data)
 
-	// if err := binary.Write(buffer, binary.BigEndian, message.GetExtLen()); err != nil {
-	// 	s := fmt.Sprintf("[Pack] Pack extLen error , %v", err)
-	// 	return nil, errors.New(s)
-	// }
-	//
-	// if err := binary.Write(buffer, binary.BigEndian, message.GetDataLen()); err != nil {
-	// 	s := fmt.Sprintf("[Pack] Pack dataLen error , %v", err)
-	// 	return nil, errors.New(s)
-	// }
-	//
-	// if err := binary.Write(buffer, binary.BigEndian, message.GetCodecType()); err != nil {
-	// 	s := fmt.Sprintf("[Pack] Pack GetCodecType error , %v", err)
-	// 	return nil, errors.New(s)
-	// }
-	//
-	// if message.GetExtLen() > 0 {
-	// 	if err := binary.Write(buffer, binary.BigEndian, message.GetExt()); err != nil {
-	// 		s := fmt.Sprintf("[Pack] Pack ext error , %v", err)
-	// 		return nil, errors.New(s)
-	// 	}
-	// }
-	//
-	// if message.GetDataLen() > 0 {
-	// 	if err := binary.Write(buffer, binary.BigEndian, message.GetData()); err != nil {
-	// 		s := fmt.Sprintf("[Pack] Pack data error , %v", err)
-	// 		return nil, errors.New(s)
-	// 	}
-	// }
+	// 写入消息总长
+	totalL := (4 + serviceFuncL) + + (4 + extDataL) + (4 + dataL)
+	fmt.Println("totleL:", totalL)
+	if err := binary.Write(buffer, binary.BigEndian, uint32(totalL)); err != nil {
+		return nil, err
+	}
+	// 写入方法名总长
+	if err := binary.Write(buffer, binary.BigEndian, uint32(serviceFuncL)); err != nil {
+		return nil, err
+	}
+	// 写入方法名
+	if err := binary.Write(buffer, binary.BigEndian, []byte(message.ServiceFunc())); err != nil {
+		return nil, err
+	}
 
-	// log.Println(string(buffer.Bytes()))
+	// 写入扩展信息长度
+	if err := binary.Write(buffer, binary.BigEndian, uint32(extDataL)); err != nil {
+		return nil, err
+	}
+	// 写入扩展信息
+	if err := binary.Write(buffer, binary.BigEndian, extData); err != nil {
+		return nil, err
+	}
+
+	// 写入消息内容长度
+	if err := binary.Write(buffer, binary.BigEndian, uint32(dataL)); err != nil {
+		return nil, err
+	}
+	// 写入消息内容
+	if err := binary.Write(buffer, binary.BigEndian, extData); err != nil {
+		return nil, err
+	}
+
 	return buffer.Bytes(), nil
 }
 
@@ -97,20 +106,47 @@ UnPack 消息解码
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
-	// log.Println("1:binaryMessage:", string(binaryMessage))
-	header := bytes.NewReader(binaryMessage[:common.HeaderLength])
+	buffer := bytes.NewReader(binaryMessage[:])
 
-	// 只解压head的信息，得到dataLen和msgID
-	var extLen, dataLen uint32
-	// 读取扩展信息长度
-	if err := binary.Read(header, binary.BigEndian, &extLen); err != nil {
+	message := &Message{
+		ext: make(map[string]string),
+	}
+
+	// 解析魔数 用于判断请求是否正确
+	_, err := io.ReadFull(buffer, message.Header[:1])
+	if err != nil {
 		return nil, err
 	}
 
-	// 读入消息长度
-	if err := binary.Read(header, binary.BigEndian, &dataLen); err != nil {
+	if !message.CheckMagicNumber() {
+		return nil, fmt.Errorf("wrong magic number: %v", message.Header[0])
+	}
+
+	// 解析header
+	_, err = io.ReadFull(buffer, message.Header[1:])
+	if err != nil {
 		return nil, err
 	}
+
+	// 解析消息总长度
+	var totalL, serviceFuncL uint32
+	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
+		return nil, err
+	}
+	fmt.Println("totalL:", totalL)
+
+	if err := binary.Read(buffer, binary.BigEndian, &serviceFuncL); err != nil {
+		return nil, err
+	}
+	fmt.Println("serviceFuncL:", serviceFuncL)
+
+	// todo
+
+	//
+	// // 读入消息长度
+	// if err := binary.Read(header, binary.BigEndian, &dataLen); err != nil {
+	// 	return nil, err
+	// }
 
 	// msg := &Message{
 	// 	extLen:  extLen,
@@ -129,7 +165,7 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 	// // 获取消息内容
 	// msg.SetData(content[msg.GetExtLen():])
 	// return msg, nil
-	return nil, nil
+	return message, nil
 }
 
 func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
