@@ -136,7 +136,7 @@ func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context,
 	controller, err := s.GetRouter(string(message.GetExt()))
 	if err != nil {
 		log.Println("[HandlerMessage] Router:", message.GetExt(), " not found", err)
-		return nil, fmt.Errorf("No Router", err)
+		return nil, fmt.Errorf("No Router %w", err)
 	}
 
 	// todo 可以考虑使用 pool
@@ -146,7 +146,7 @@ func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context,
 	err = controller(context)
 	if err != nil {
 		log.Println(err)
-		return nil, fmt.Errorf(" fail", err)
+		return nil, fmt.Errorf(" fail %w", err)
 	}
 
 	// resultData, err := context.GetResult()

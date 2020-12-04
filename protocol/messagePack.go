@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
-	"net"
 
 	"github.com/akkagao/gms/common"
 )
@@ -48,7 +46,7 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 
 	// 写入消息总长
 	totalL := (4 + serviceFuncL) + + (4 + extDataL) + (4 + dataL)
-	fmt.Println("totleL:", totalL)
+	// fmt.Println("totleL:", totalL)
 	if err := binary.Write(buffer, binary.BigEndian, uint32(totalL)); err != nil {
 		return nil, err
 	}
@@ -75,7 +73,7 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 		return nil, err
 	}
 	// 写入消息内容
-	if err := binary.Write(buffer, binary.BigEndian, extData); err != nil {
+	if err := binary.Write(buffer, binary.BigEndian, data); err != nil {
 		return nil, err
 	}
 
@@ -100,6 +98,33 @@ func encodeExt(m map[string]string) []byte {
 	return buf.Bytes()
 }
 
+func decodeExt(l uint32, data []byte) (map[string]string, error) {
+	m := make(map[string]string, 10)
+	n := uint32(0)
+	for n < l {
+		// parse one key and value
+		// key
+		sl := binary.BigEndian.Uint32(data[n : n+4])
+		n = n + 4
+		if n+sl > l-4 {
+			return m, errors.New("wrong ext some keys or values are missing")
+		}
+		k := string(data[n : n+sl])
+		n = n + sl
+
+		// value
+		sl = binary.BigEndian.Uint32(data[n : n+4])
+		n = n + 4
+		if n+sl > l {
+			return m, errors.New("wrong ext some keys or values are missing")
+		}
+		v := string(data[n : n+sl])
+		n = n + sl
+		m[k] = v
+	}
+	return m, nil
+}
+
 /*
 UnPack 消息解码
 消息格式
@@ -109,7 +134,6 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 	buffer := bytes.NewReader(binaryMessage[:])
 
 	message := &Message{
-		ext: make(map[string]string),
 	}
 
 	// 解析魔数 用于判断请求是否正确
@@ -129,121 +153,126 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 	}
 
 	// 解析消息总长度
-	var totalL, serviceFuncL uint32
+	var totalL, serviceFuncL, extL, dataL uint32
 	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
 		return nil, err
 	}
-	fmt.Println("totalL:", totalL)
 
+	// 读取方法名长度
 	if err := binary.Read(buffer, binary.BigEndian, &serviceFuncL); err != nil {
 		return nil, err
 	}
-	fmt.Println("serviceFuncL:", serviceFuncL)
 
-	// todo
+	// 读取方法名
+	serviceFuncData := make([]byte, serviceFuncL)
+	if l, err := io.ReadFull(buffer, serviceFuncData); l != int(serviceFuncL) || err != nil {
+		return nil, fmt.Errorf("read len 0 or %w", err)
+	}
+	message.serviceFunc = common.SliceByteToString(serviceFuncData)
 
-	//
-	// // 读入消息长度
-	// if err := binary.Read(header, binary.BigEndian, &dataLen); err != nil {
-	// 	return nil, err
-	// }
+	// 读取扩展信息长度
+	if err := binary.Read(buffer, binary.BigEndian, &extL); err != nil {
+		return nil, err
+	}
 
-	// msg := &Message{
-	// 	extLen:  extLen,
-	// 	dataLen: dataLen,
-	// 	count:   common.HeaderLength + extLen + dataLen + 1,
-	// }
-	//
-	// codecType := binaryMessage[common.HeaderLength : common.HeaderLength+1]
-	// msg.codecType = codec.CodecType(codecType[0])
-	//
-	// // 截取消息头后的所有内容
-	// content := binaryMessage[common.HeaderLength+1 : msg.GetCount()]
-	//
-	// // 获取扩展消息
-	// msg.SetExt(content[:msg.GetExtLen()])
-	// // 获取消息内容
-	// msg.SetData(content[msg.GetExtLen():])
-	// return msg, nil
+	// 读取扩展信息
+	extData := make([]byte, extL)
+	if l, err := io.ReadFull(buffer, extData); l != int(extL) || err != nil {
+		return nil, fmt.Errorf("read len 0 or %w", err)
+	}
+
+	message.ext, err = decodeExt(extL, extData)
+
+	// 读取信息长度
+	if err := binary.Read(buffer, binary.BigEndian, &dataL); err != nil {
+		return nil, err
+	}
+
+	// 读取信息
+	data := make([]byte, dataL)
+	if l, err := io.ReadFull(buffer, data); l != int(dataL) || err != nil {
+		return nil, fmt.Errorf("read len 0 or %w", err)
+	}
+	message.data = data
 	return message, nil
 }
 
-func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
-	headData := make([]byte, common.HeaderLength)
-	_, err := io.ReadFull(conn, headData) // ReadFull 会把msg填充满为止
-	if err != nil {
-		log.Println("[Read] read header error", err)
-		return nil, err
-	}
-
-	header := bytes.NewReader(headData)
-	// log.Println(string(headData))
-
-	// 只解压head的信息，得到dataLen和msgID
-	var extLen, dataLen uint32
-	// 读取扩展信息长度
-	if err := binary.Read(header, binary.BigEndian, &extLen); err != nil {
-		return nil, err
-	}
-
-	// 读入消息长度
-	if err := binary.Read(header, binary.BigEndian, &dataLen); err != nil {
-		return nil, err
-	}
-
-	msg := &Message{
-		// extLen:  extLen,
-		// dataLen: dataLen,
-		// count:   common.HeaderLength + extLen + dataLen + 1,
-	}
-
-	codecType := make([]byte, 1)
-	{
-		n, err := io.ReadFull(conn, codecType)
-		if err != nil {
-			log.Println("[Read] read codecType error", err)
-			return nil, err
-		}
-		if uint32(n) != 1 {
-			log.Println("[Read] read codecType len error")
-			return nil, errors.New("read codecType error")
-		}
-	}
-
-	extData := make([]byte, extLen)
-	// 读取扩展信息
-	{
-		n, err := io.ReadFull(conn, extData)
-		if err != nil {
-			log.Println("[Read] read extData error", err)
-			return nil, err
-		}
-		if uint32(n) != extLen {
-			log.Println("[Read] read extData len error")
-			return nil, errors.New("read extData error")
-		}
-	}
-
-	data := make([]byte, dataLen)
-	// 读取数据
-	{
-		n, err := io.ReadFull(conn, data)
-		if err != nil {
-			log.Println("[Read] read date error", err)
-			return nil, err
-		}
-		if uint32(n) != dataLen {
-			log.Println("[Read] read data len error")
-			return nil, errors.New("read extData error")
-		}
-	}
-
-	// 设置编码类型
-	// msg.SetCodecType(codec.CodecType(codecType[0]))
-	// // 获取扩展消息
-	// msg.SetExt(extData)
-	// 获取消息内容
-	msg.SetData(data)
-	return msg, nil
-
-}
+// func (m *MessagePack) ReadUnPack(conn net.Conn) (Imessage, error) {
+// 	headData := make([]byte, common.HeaderLength)
+// 	_, err := io.ReadFull(conn, headData) // ReadFull 会把msg填充满为止
+// 	if err != nil {
+// 		log.Println("[Read] read header error", err)
+// 		return nil, err
+// 	}
+//
+// 	header := bytes.NewReader(headData)
+// 	// log.Println(string(headData))
+//
+// 	// 只解压head的信息，得到dataLen和msgID
+// 	var extLen, dataLen uint32
+// 	// 读取扩展信息长度
+// 	if err := binary.Read(header, binary.BigEndian, &extLen); err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 读入消息长度
+// 	if err := binary.Read(header, binary.BigEndian, &dataLen); err != nil {
+// 		return nil, err
+// 	}
+//
+// 	msg := &Message{
+// 		// extLen:  extLen,
+// 		// dataLen: dataLen,
+// 		// count:   common.HeaderLength + extLen + dataLen + 1,
+// 	}
+//
+// 	codecType := make([]byte, 1)
+// 	{
+// 		n, err := io.ReadFull(conn, codecType)
+// 		if err != nil {
+// 			log.Println("[Read] read codecType error", err)
+// 			return nil, err
+// 		}
+// 		if uint32(n) != 1 {
+// 			log.Println("[Read] read codecType len error")
+// 			return nil, errors.New("read codecType error")
+// 		}
+// 	}
+//
+// 	extData := make([]byte, extLen)
+// 	// 读取扩展信息
+// 	{
+// 		n, err := io.ReadFull(conn, extData)
+// 		if err != nil {
+// 			log.Println("[Read] read extData error", err)
+// 			return nil, err
+// 		}
+// 		if uint32(n) != extLen {
+// 			log.Println("[Read] read extData len error")
+// 			return nil, errors.New("read extData error")
+// 		}
+// 	}
+//
+// 	data := make([]byte, dataLen)
+// 	// 读取数据
+// 	{
+// 		n, err := io.ReadFull(conn, data)
+// 		if err != nil {
+// 			log.Println("[Read] read date error", err)
+// 			return nil, err
+// 		}
+// 		if uint32(n) != dataLen {
+// 			log.Println("[Read] read data len error")
+// 			return nil, errors.New("read extData error")
+// 		}
+// 	}
+//
+// 	// 设置编码类型
+// 	// msg.SetCodecType(codec.CodecType(codecType[0]))
+// 	// // 获取扩展消息
+// 	// msg.SetExt(extData)
+// 	// 获取消息内容
+// 	msg.SetData(data)
+// 	return msg, nil
+//
+// }

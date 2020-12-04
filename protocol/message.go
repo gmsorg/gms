@@ -129,5 +129,6 @@ func (m *Message) SetData(data []byte) {
 GetData 获取主体数据内容
 */
 func (m *Message) GetData() []byte {
+
 	return m.data
 }

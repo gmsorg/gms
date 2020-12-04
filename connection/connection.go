@@ -49,7 +49,7 @@ func (c *Connection) Read() (protocol.Imessage, error) {
 
 	message, err := c.messagePack.ReadUnPack(c.conn)
 	if err != nil {
-		return nil, fmt.Errorf("Read %v", err)
+		return nil, fmt.Errorf("Read %w", err)
 	}
 
 	return message, nil

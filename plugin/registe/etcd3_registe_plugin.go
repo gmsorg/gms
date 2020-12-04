@@ -49,14 +49,14 @@ func (e *Etcd3RegistePlugin) Start() error {
 
 	err = e.kv.Put(common.BasePath, []byte(common.BasePath), &store.WriteOptions{IsDir: true})
 	if err != nil {
-		fmt.Errorf("[Etcd3RegistePlugin] put BasePath error: %v", err)
+		fmt.Errorf("[Etcd3RegistePlugin] put BasePath error: %w", err)
 		return err
 	}
 
 	nodeName := fmt.Sprintf("%v/%v", common.BasePath, e.GmsServerName)
 	err = e.kv.Put(nodeName, []byte(e.GmsServerName), &store.WriteOptions{IsDir: true})
 	if err != nil {
-		fmt.Errorf("[Etcd3RegistePlugin] put nodeName: %v error: %v", nodeName, err)
+		fmt.Errorf("[Etcd3RegistePlugin] put nodeName: %v error: %w", nodeName, err)
 	}
 
 	return nil
@@ -93,7 +93,7 @@ func (e *Etcd3RegistePlugin) registeService() error {
 	nodeName := fmt.Sprintf("%v/%v/%v", common.BasePath, e.GmsServerName, e.GmsServiceAddress)
 	err := e.kv.Put(nodeName, []byte(e.GmsServiceAddress), &store.WriteOptions{TTL: e.UpdateInterval * 2})
 	if err != nil {
-		return fmt.Errorf("[Etcd3RegistePlugin] put nodeName: %v error: %v", nodeName, err)
+		return fmt.Errorf("[Etcd3RegistePlugin] put nodeName: %v error: %w", nodeName, err)
 	}
 	return nil
 }
