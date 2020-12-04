@@ -77,8 +77,9 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	message := protocol.NewMessage()
 	message.SetServiceFunc(serviceFunc)
 	message.SetData(codecByte)
-	message.SetSerializeType(message.GetSerializeType())
-	message.SetSeq(message.GetSeq())
+	message.SetSerializeType(c.codecType)
+	// todo seq
+	message.SetSeq(1)
 	message.SetCompressType(message.GetCompressType())
 	message.SetMessageType(protocol.Request)
 

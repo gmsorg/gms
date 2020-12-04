@@ -2,7 +2,6 @@ package gmsContext
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/akkagao/gms/codec"
@@ -35,8 +34,6 @@ func (c *Context) Param(param interface{}) error {
 
 	// 获取指定的序列化器
 	codec := codec.GetCodec(c.message.GetSerializeType())
-	fmt.Println(c.message.GetSerializeType())
-	fmt.Println(string(c.message.GetData()))
 	err := codec.Decode(c.message.GetData(), param)
 	if err != nil {
 		log.Println("[Param] error", err)
