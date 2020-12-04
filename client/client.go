@@ -68,12 +68,19 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 
 	// 把 request 序列化成字节数组
 	codecByte, err := codecReq.Encode(request)
+	fmt.Println(string(codecByte))
 	if err != nil {
 		log.Println(err)
 	}
 
 	// 组装消息
-	message := protocol.NewMessage([]byte(serviceFunc), codecByte, c.codecType)
+	message := protocol.NewMessage()
+	message.SetServiceFunc(serviceFunc)
+	message.SetData(codecByte)
+	message.SetSerializeType(message.GetSerializeType())
+	message.SetSeq(message.GetSeq())
+	message.SetCompressType(message.GetCompressType())
+	message.SetMessageType(protocol.Request)
 
 	// 打包消息
 	eb, err := c.messagePack.Pack(message)
@@ -99,7 +106,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 		return err
 	}
 
-	codecRes := codec.GetCodec(messageRes.GetCodecType())
+	codecRes := codec.GetCodec(messageRes.GetSerializeType())
 	// 返序列化返回结果 成response
 	codecRes.Decode(messageRes.GetData(), response)
 	return nil

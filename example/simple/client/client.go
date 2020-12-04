@@ -28,13 +28,14 @@ func main() {
 	}
 
 	// 设置 Msgpack 序列化器，默认也是 Msgpack
-	additionClient.SetCodecType(codec.Msgpack)
+	// todo Msgpack 发送到服务端会解析错误。header 解析失败了
+	additionClient.SetCodecType(codec.JSON)
 
 	// 请求对象
 	start := time.Now()
 
 	waitGroup := sync.WaitGroup{}
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 1; i++ {
 		waitGroup.Add(1)
 		go func(i int) {
 			for j := 0; j < 1; j++ {
