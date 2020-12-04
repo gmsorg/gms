@@ -33,7 +33,7 @@ func (c *Context) SetMessage(message protocol.Imessage) error {
 func (c *Context) Param(param interface{}) error {
 
 	// 获取指定的序列化器
-	codec := codec.GetCodec(c.message.GetCodecType())
+	codec := codec.GetCodec(c.message.GetSerializeType())
 	err := codec.Decode(c.message.GetData(), param)
 
 	// err := json.Unmarshal(c.message.GetData(), param)
@@ -45,7 +45,7 @@ func (c *Context) Param(param interface{}) error {
 }
 
 func (c *Context) Result(result interface{}) error {
-	codec := codec.GetCodec(c.message.GetCodecType())
+	codec := codec.GetCodec(c.message.GetSerializeType())
 	r, err := codec.Encode(result)
 	// // todo 改为其他序列化方式
 	// r, err := json.Marshal(result)

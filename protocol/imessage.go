@@ -20,32 +20,32 @@ type Imessage interface {
 
 	CheckMagicNumber() bool
 
-	Version() byte
+	GetVersion() byte
 
 	SetVersion(v byte)
 
-	MessageType() MessageType
+	GetMessageType() MessageType
 
 	SetMessageType(mt MessageType)
 
 	// 获取消息压缩类型
-	CompressType() CompressType
+	GetCompressType() CompressType
 
 	// 设置消息压缩类型
 	SetCompressType(ct CompressType)
 
 	// 获取序列化类型
-	SerializeType() codec.CodecType
+	GetSerializeType() codec.CodecType
 	// 设置序列化类型
 	SetSerializeType(ct codec.CodecType)
 
 	// 获取消息序号
-	Seq() uint64
+	GetSeq() uint64
 	// 设置消息序号
 	SetSeq(seq uint64)
 
 	// 获取请求方法名
-	ServiceFunc() string
+	GetServiceFunc() string
 	// 设置请求方法名
 	SetServiceFunc(serviceFunc string)
 

@@ -24,7 +24,7 @@ func NewMessage() Imessage {
 
 	message := &Message{
 		Header: header,
-		ext:    make(map[string]string),
+		// ext:    make(map[string]string),
 	}
 	message.setMagicNumber()
 
@@ -44,8 +44,8 @@ func (m *Message) CheckMagicNumber() bool {
 	return m.Header[0] == magicNumber
 }
 
-// Version returns version of rpcx protocol.
-func (m *Message) Version() byte {
+// GetVersion returns version of rpcx protocol.
+func (m *Message) GetVersion() byte {
 	return m.Header[1]
 }
 
@@ -54,8 +54,8 @@ func (m *Message) SetVersion(v byte) {
 	m.Header[1] = v
 }
 
-// MessageType returns the message type.
-func (m *Message) MessageType() MessageType {
+// GetMessageType returns the message type.
+func (m *Message) GetMessageType() MessageType {
 	return MessageType(m.Header[2])
 }
 
@@ -64,8 +64,8 @@ func (m *Message) SetMessageType(mt MessageType) {
 	m.Header[2] = byte(mt)
 }
 
-// CompressType returns compression type of messages.
-func (m *Message) CompressType() CompressType {
+// GetCompressType returns compression type of messages.
+func (m *Message) GetCompressType() CompressType {
 	return CompressType((m.Header[3]))
 }
 
@@ -74,8 +74,8 @@ func (m *Message) SetCompressType(ct CompressType) {
 	m.Header[3] = byte(ct)
 }
 
-// SerializeType returns serialization type of payload.
-func (m *Message) SerializeType() codec.CodecType {
+// GetSerializeType returns serialization type of payload.
+func (m *Message) GetSerializeType() codec.CodecType {
 	return codec.CodecType((m.Header[4]))
 }
 
@@ -84,8 +84,8 @@ func (m *Message) SetSerializeType(ct codec.CodecType) {
 	m.Header[4] = byte(ct)
 }
 
-// Seq returns sequence number of messages.
-func (m *Message) Seq() uint64 {
+// GetSeq returns sequence number of messages.
+func (m *Message) GetSeq() uint64 {
 	return binary.BigEndian.Uint64(m.Header[5:])
 }
 
@@ -95,7 +95,7 @@ func (m *Message) SetSeq(seq uint64) {
 }
 
 // 获取请求方法名
-func (m *Message) ServiceFunc() string {
+func (m *Message) GetServiceFunc() string {
 	return m.serviceFunc
 }
 

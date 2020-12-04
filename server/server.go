@@ -79,7 +79,7 @@ func (s *server) InitServe(port int) {
 /*
 启动服务
 */
-func (s *server) Run( ip string, port int) {
+func (s *server) Run(ip string, port int) {
 	log.Println("[gmsServer] start run gms gmsServer")
 	// 启动所有插件
 	s.plugins.Start()
@@ -133,7 +133,7 @@ func (s *server) GetRouter(handlerName string) (gmsContext.Controller, error) {
 // func (s *server) HandlerMessage(message protocol.Imessage) (gmsContext.Context, error) {
 func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error) {
 	// log.Println(string(message.GetExt()))
-	controller, err := s.GetRouter(string(message.GetExt()))
+	controller, err := s.GetRouter(message.GetServiceFunc())
 	if err != nil {
 		log.Println("[HandlerMessage] Router:", message.GetExt(), " not found", err)
 		return nil, fmt.Errorf("No Router %w", err)

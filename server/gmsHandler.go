@@ -56,7 +56,13 @@ func (gh *gmsHandler) handle(frame []byte, c gnet.Conn) {
 		log.Println(err)
 	}
 
-	resultMessage := protocol.NewMessage([]byte("1"), result, message.GetCodecType())
+	resultMessage := protocol.NewMessage()
+	resultMessage.SetData(result)
+	resultMessage.SetSerializeType(message.GetSerializeType())
+	resultMessage.SetSeq(message.GetSeq())
+	resultMessage.SetCompressType(message.GetCompressType())
+	resultMessage.SetMessageType(protocol.Response)
+
 	rb, err := gh.messagePack.Pack(resultMessage)
 	if err != nil {
 		log.Println("[gmsHandler handle] error: %v", err)

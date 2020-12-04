@@ -36,7 +36,7 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 		return nil, err
 	}
 
-	serviceFuncL := len(message.ServiceFunc())
+	serviceFuncL := len(message.GetServiceFunc())
 
 	extData := encodeExt(message.GetExt())
 	extDataL := len(extData)
@@ -55,7 +55,7 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 		return nil, err
 	}
 	// 写入方法名
-	if err := binary.Write(buffer, binary.BigEndian, []byte(message.ServiceFunc())); err != nil {
+	if err := binary.Write(buffer, binary.BigEndian, []byte(message.GetServiceFunc())); err != nil {
 		return nil, err
 	}
 
