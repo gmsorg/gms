@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"log"
@@ -65,20 +66,20 @@ func (s *server) InitServe(port int) {
 	}
 
 	// gent 消息编解码
-	// encoderConfig := gnet.EncoderConfig{
-	// 	ByteOrder:                       binary.BigEndian,
-	// 	LengthFieldLength:               4,
-	// 	LengthAdjustment:                0,
-	// 	LengthIncludesLengthFieldLength: false,
-	// }
-	// decoderConfig := gnet.DecoderConfig{
-	// 	ByteOrder:           binary.BigEndian,
-	// 	LengthFieldOffset:   0,
-	// 	LengthFieldLength:   4,
-	// 	LengthAdjustment:    0,
-	// 	InitialBytesToStrip: 4,
-	// }
-	// codec := gnet.NewLengthFieldBasedFrameCodec(encoderConfig, decoderConfig)
+	encoderConfig := gnet.EncoderConfig{
+		ByteOrder:                       binary.BigEndian,
+		LengthFieldLength:               4,
+		LengthAdjustment:                0,
+		LengthIncludesLengthFieldLength: false,
+	}
+	decoderConfig := gnet.DecoderConfig{
+		ByteOrder:           binary.BigEndian,
+		LengthFieldOffset:   0,
+		LengthFieldLength:   4,
+		LengthAdjustment:    0,
+		InitialBytesToStrip: 4,
+	}
+	codec := gnet.NewLengthFieldBasedFrameCodec(encoderConfig, decoderConfig)
 
 	if port < 1 {
 		port = common.GmsPort
@@ -88,7 +89,7 @@ func (s *server) InitServe(port int) {
 		fmt.Sprintf("tcp://:%v", port),
 		gnet.WithMulticore(true),
 		gnet.WithTCPKeepAlive(time.Minute*5), // todo 需要确定是否对长连接有影响
-		// gnet.WithCodec(codec),
+		gnet.WithCodec(codec),
 	))
 }
 

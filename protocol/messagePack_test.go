@@ -10,7 +10,7 @@ import (
 func TestMessagePack_Encode(t *testing.T) {
 	message := newMessage()
 	mp := MessagePack{}
-	encodeData, err := mp.Pack(message)
+	encodeData, err := mp.Pack(message, true)
 	fmt.Println(encodeData)
 	fmt.Println(string(encodeData), err)
 }
@@ -18,7 +18,7 @@ func TestMessagePack_Encode(t *testing.T) {
 func TestMessagePack_Decode(t *testing.T) {
 	message := newMessage()
 	mp := MessagePack{}
-	encodeData, err := mp.Pack(message)
+	encodeData, err := mp.Pack(message, true)
 	fmt.Println(err)
 	fmt.Println("===============")
 	m, err := mp.UnPackLen(encodeData)
