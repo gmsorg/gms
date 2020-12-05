@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/gmsorg/gms/client"
-	"github.com/gmsorg/gms/serialize"
 	"github.com/gmsorg/gms/discovery"
 	"github.com/gmsorg/gms/example/model"
+	"github.com/gmsorg/gms/serialize"
 )
 
 /*
@@ -30,14 +30,27 @@ func main() {
 	// 设置 Msgpack 序列化器，默认也是 Msgpack
 	additionClient.SetSerializeType(serialize.Msgpack)
 
-	// 请求对象
-	start := time.Now()
+	cs, t := 6, 100
+	var callt, callOldt time.Duration
+	{
+		start := time.Now()
+		call(additionClient, cs, t)
+		callt = time.Since(start)
+	}
+	{
+		start := time.Now()
+		callOld(additionClient, cs, t)
+		callOldt = time.Since(start)
+	}
+	fmt.Println("callt:", callt, "callOldt:", callOldt)
+}
 
+func call(additionClient client.IClient, cs, t int) {
 	waitGroup := sync.WaitGroup{}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < cs; i++ {
 		waitGroup.Add(1)
 		go func(i int) {
-			for j := 0; j < 10; j++ {
+			for j := 0; j < t; j++ {
 				rand.Seed(time.Now().UnixNano())
 				// req := &model.AdditionReq{NumberA: 100, NumberB: 200}
 				req := &model.AdditionReq{NumberA: rand.Intn(100), NumberB: rand.Intn(200)}
@@ -46,16 +59,42 @@ func main() {
 				res := &model.AdditionRes{}
 
 				// 调用服务
-				err = additionClient.Call("addition", req, res)
+				err := additionClient.Call("addition", req, res)
 				if err != nil {
 					log.Println(err)
 				}
-				log.Println(fmt.Sprintf("%v-%v :%d+%d=%d", i, j, req.NumberA, req.NumberB, res.Result))
+				log.Println(fmt.Sprintf("call %v-%v : %d+%d=%d", i, j, req.NumberA, req.NumberB, res.Result))
 			}
 			waitGroup.Done()
 		}(i)
 	}
 	waitGroup.Wait()
 
-	fmt.Println(time.Since(start))
+}
+
+func callOld(additionClient client.IClient, cs, t int) {
+
+	waitGroup := sync.WaitGroup{}
+	for i := 0; i < cs; i++ {
+		waitGroup.Add(1)
+		go func(i int) {
+			for j := 0; j < t; j++ {
+				rand.Seed(time.Now().UnixNano())
+				// req := &model.AdditionReq{NumberA: 100, NumberB: 200}
+				req := &model.AdditionReq{NumberA: rand.Intn(100), NumberB: rand.Intn(200)}
+
+				// 接收返回值的对象
+				res := &model.AdditionRes{}
+
+				// 调用服务
+				err := additionClient.CallOld("addition", req, res)
+				if err != nil {
+					log.Println(err)
+				}
+				log.Println(fmt.Sprintf("callOld:%v-%v : %d+%d=%d", i, j, req.NumberA, req.NumberB, res.Result))
+			}
+			waitGroup.Done()
+		}(i)
+	}
+	waitGroup.Wait()
 }
