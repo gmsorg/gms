@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 
 	"github.com/akkagao/gms/common"
 )
@@ -135,72 +134,10 @@ UnPack 消息解码
 func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 	buffer := bytes.NewReader(binaryMessage[:])
 
-	message := &Message{
-	}
-
-	// 解析魔数 用于判断请求是否正确
-	_, err := io.ReadFull(buffer, message.Header[:1])
-	if err != nil {
-		return nil, err
-	}
-
-	if !message.CheckMagicNumber() {
-		return nil, fmt.Errorf("wrong magic number: %v", message.Header[0])
-	}
-
-	// 解析header
-	_, err = io.ReadFull(buffer, message.Header[1:])
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(message.GetSerializeType())
-
-	// 解析消息总长度
-	var totalL, serviceFuncL, extL, dataL uint32
-	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
-		return nil, err
-	}
-
-	// 读取方法名长度
-	if err := binary.Read(buffer, binary.BigEndian, &serviceFuncL); err != nil {
-		return nil, err
-	}
-
-	// 读取方法名
-	serviceFuncData := make([]byte, serviceFuncL)
-	if l, err := io.ReadFull(buffer, serviceFuncData); l != int(serviceFuncL) || err != nil {
-		return nil, fmt.Errorf("read len 0 or %w", err)
-	}
-	message.serviceFunc = common.SliceByteToString(serviceFuncData)
-
-	// 读取扩展信息长度
-	if err := binary.Read(buffer, binary.BigEndian, &extL); err != nil {
-		return nil, err
-	}
-
-	// 读取扩展信息
-	extData := make([]byte, extL)
-	if l, err := io.ReadFull(buffer, extData); l != int(extL) || err != nil {
-		return nil, fmt.Errorf("read len 0 or %w", err)
-	}
-
-	message.ext, err = decodeExt(extL, extData)
-
-	// 读取信息长度
-	if err := binary.Read(buffer, binary.BigEndian, &dataL); err != nil {
-		return nil, err
-	}
-
-	// 读取信息
-	data := make([]byte, dataL)
-	if l, err := io.ReadFull(buffer, data); l != int(dataL) || err != nil {
-		return nil, fmt.Errorf("read len 0 or %w", err)
-	}
-	message.data = data
-	return message, nil
+	return m.ReadUnPack(buffer)
 }
 
-func (m *MessagePack) ReadUnPack(buffer net.Conn) (Imessage, error) {
+func (m *MessagePack) ReadUnPack(buffer io.Reader) (Imessage, error) {
 
 	message := &Message{
 	}

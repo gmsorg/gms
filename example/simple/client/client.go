@@ -28,7 +28,6 @@ func main() {
 	}
 
 	// 设置 Msgpack 序列化器，默认也是 Msgpack
-	// todo Msgpack 发送到服务端会解析错误。header 解析失败了(明天继续)
 	additionClient.SetCodecType(codec.Msgpack)
 
 	// 请求对象
