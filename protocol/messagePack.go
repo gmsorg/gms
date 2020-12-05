@@ -27,7 +27,7 @@ Pack 消息编码
 消息格式
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
-func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
+func (m *MessagePack) Pack(message Imessage, writeTotalLen bool) ([]byte, error) {
 	result := make([]byte, 0)
 
 	buffer := bytes.NewBuffer(result)
@@ -40,11 +40,13 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 	data := message.GetData()
 	dataL := len(data)
 
-	// 写入消息体总长
-	totalL := len(message.GetHeader()) + (4 + serviceFuncL) + + (4 + extDataL) + (4 + dataL)
-	// fmt.Println(message.GetMessageType(), "totleL:", totalL)
-	if err := binary.Write(buffer, binary.BigEndian, uint32(totalL)); err != nil {
-		return nil, err
+	if writeTotalLen {
+		// 写入消息体总长
+		totalL := len(message.GetHeader()) + (4 + serviceFuncL) + + (4 + extDataL) + (4 + dataL)
+		// fmt.Println(message.GetMessageType(), "totleL:", totalL)
+		if err := binary.Write(buffer, binary.BigEndian, uint32(totalL)); err != nil {
+			return nil, err
+		}
 	}
 
 	// 写入header
@@ -88,51 +90,6 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// len,string,len,string,......
-func encodeExt(m map[string]string) []byte {
-	if len(m) == 0 {
-		return []byte{}
-	}
-	var buf bytes.Buffer
-	var d = make([]byte, 4)
-	for k, v := range m {
-		binary.BigEndian.PutUint32(d, uint32(len(k)))
-		buf.Write(d)
-		buf.Write(common.StringToSliceByte(k))
-		binary.BigEndian.PutUint32(d, uint32(len(v)))
-		buf.Write(d)
-		buf.Write(common.StringToSliceByte(v))
-	}
-	return buf.Bytes()
-}
-
-func decodeExt(l uint32, data []byte) (map[string]string, error) {
-	m := make(map[string]string, 10)
-	n := uint32(0)
-	for n < l {
-		// parse one key and value
-		// key
-		sl := binary.BigEndian.Uint32(data[n : n+4])
-		n = n + 4
-		if n+sl > l-4 {
-			return m, errors.New("wrong ext some keys or values are missing")
-		}
-		k := string(data[n : n+sl])
-		n = n + sl
-
-		// value
-		sl = binary.BigEndian.Uint32(data[n : n+4])
-		n = n + 4
-		if n+sl > l {
-			return m, errors.New("wrong ext some keys or values are missing")
-		}
-		v := string(data[n : n+sl])
-		n = n + sl
-		m[k] = v
-	}
-	return m, nil
-}
-
 func (m *MessagePack) UnPackLen(binaryMessage []byte) (Imessage, error) {
 	// fmt.Println(fmt.Sprintf("binaryMessage len:%v", len(binaryMessage)))
 	buffer := bytes.NewReader(binaryMessage[:])
@@ -163,9 +120,9 @@ func (m *MessagePack) ReadUnPackLen(buffer io.Reader) (Imessage, error) {
 	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
 		return nil, err
 	}
-	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
-		return nil, err
-	}
+	// if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
+	// 	return nil, err
+	// }
 	return m.ReadUnPack(buffer)
 }
 
@@ -236,4 +193,49 @@ func (m *MessagePack) ReadUnPack(buffer io.Reader) (Imessage, error) {
 	}
 	message.data = data
 	return message, nil
+}
+
+// len,string,len,string,......
+func encodeExt(m map[string]string) []byte {
+	if len(m) == 0 {
+		return []byte{}
+	}
+	var buf bytes.Buffer
+	var d = make([]byte, 4)
+	for k, v := range m {
+		binary.BigEndian.PutUint32(d, uint32(len(k)))
+		buf.Write(d)
+		buf.Write(common.StringToSliceByte(k))
+		binary.BigEndian.PutUint32(d, uint32(len(v)))
+		buf.Write(d)
+		buf.Write(common.StringToSliceByte(v))
+	}
+	return buf.Bytes()
+}
+
+func decodeExt(l uint32, data []byte) (map[string]string, error) {
+	m := make(map[string]string, 10)
+	n := uint32(0)
+	for n < l {
+		// parse one key and value
+		// key
+		sl := binary.BigEndian.Uint32(data[n : n+4])
+		n = n + 4
+		if n+sl > l-4 {
+			return m, errors.New("wrong ext some keys or values are missing")
+		}
+		k := string(data[n : n+sl])
+		n = n + sl
+
+		// value
+		sl = binary.BigEndian.Uint32(data[n : n+4])
+		n = n + 4
+		if n+sl > l {
+			return m, errors.New("wrong ext some keys or values are missing")
+		}
+		v := string(data[n : n+sl])
+		n = n + sl
+		m[k] = v
+	}
+	return m, nil
 }

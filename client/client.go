@@ -6,11 +6,11 @@ import (
 	"net"
 	"sync"
 
-	"github.com/gmsorg/gms/serialize"
 	"github.com/gmsorg/gms/connection"
 	"github.com/gmsorg/gms/discovery"
 	"github.com/gmsorg/gms/protocol"
 	"github.com/gmsorg/gms/selector"
+	"github.com/gmsorg/gms/serialize"
 )
 
 type Client struct {
@@ -51,7 +51,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 		return errors.New("can't find server")
 	}
 
-	//todo 锁需要优化
+	// todo 锁需要优化
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
@@ -84,7 +84,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	message.SetMessageType(protocol.Request)
 
 	// 打包消息
-	eb, err := c.messagePack.Pack(message)
+	eb, err := c.messagePack.Pack(message, true)
 	if err != nil {
 		// 错误处理
 		log.Println(err)
