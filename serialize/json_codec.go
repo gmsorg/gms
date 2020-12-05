@@ -1,18 +1,18 @@
-package codec
+package serialize
 
 import (
 	"bytes"
 	"encoding/json"
 )
 
-type JsonCodec struct {
+type JsonSerialize struct {
 }
 
-func (j *JsonCodec) Encode(i interface{}) ([]byte, error) {
+func (j *JsonSerialize) Serialize(i interface{}) ([]byte, error) {
 	return json.Marshal(i)
 }
 
-func (j *JsonCodec) Decode(data []byte, i interface{}) error {
+func (j *JsonSerialize) UnSerialize(data []byte, i interface{}) error {
 	d := json.NewDecoder(bytes.NewBuffer(data))
 	// 解决json返序列化，interface{}接收。数字被解析为float64,精度丢失问题
 	d.UseNumber()

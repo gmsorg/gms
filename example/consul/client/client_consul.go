@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gmsorg/gms/client"
-	"github.com/gmsorg/gms/codec"
+	"github.com/gmsorg/gms/serialize"
 	"github.com/gmsorg/gms/discovery"
 	"github.com/gmsorg/gms/example/model"
 )
@@ -29,7 +29,7 @@ func main() {
 	}
 
 	// 设置 Msgpack 序列化器，默认也是 Msgpack
-	additionClient.SetCodecType(codec.Msgpack)
+	additionClient.SetSerializeType(serialize.Msgpack)
 
 	// 请求对象
 	req := &model.AdditionReq{NumberA: 10, NumberB: 20}

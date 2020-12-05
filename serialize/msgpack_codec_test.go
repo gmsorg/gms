@@ -1,4 +1,4 @@
-package codec
+package serialize
 
 import (
 	"log"
@@ -12,19 +12,19 @@ type demo struct {
 }
 
 func TestMsgpackCodec_Encode(t *testing.T) {
-	msgpackCodec := MsgpackCode{}
+	msgpackCodec := MsgpackSerialize{}
 	demoEncode := demo{
 		Str:    "CrazyWolf",
 		Number: 20,
 		Inter:  1603024853073143124,
 	}
-	ub, err := msgpackCodec.Encode(demoEncode)
+	ub, err := msgpackCodec.Serialize(demoEncode)
 	if err != nil {
 		log.Println(err)
 	}
 
 	demoDecode := &demo{}
-	err = msgpackCodec.Decode(ub, demoDecode)
+	err = msgpackCodec.UnSerialize(ub, demoDecode)
 	if err != nil {
 		log.Println(err)
 	}

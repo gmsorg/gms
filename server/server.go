@@ -56,13 +56,13 @@ func (s *server) InitServe(port int) {
 	pool := goroutine.Default()
 	defer pool.Release()
 
-	// codec := &protocol.MessagePack{}
+	// serialize := &protocol.MessagePack{}
 	// 启动gnet
 	s.gmsHandler = &gmsHandler{
 		gmsServer:   s,
 		pool:        pool,
 		messagePack: protocol.NewMessagePack(),
-		// codec:     codec,
+		// serialize:     serialize,
 	}
 
 	// gent 消息编解码

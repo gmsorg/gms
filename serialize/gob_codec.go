@@ -1,20 +1,20 @@
-package codec
+package serialize
 
 import (
 	"bytes"
 	"encoding/gob"
 )
 
-type GobCodec struct {
+type GobSerialize struct {
 }
 
-func (c *GobCodec) Decode(data []byte, i interface{}) error {
+func (c *GobSerialize) UnSerialize(data []byte, i interface{}) error {
 	enc := gob.NewDecoder(bytes.NewBuffer(data))
 	err := enc.Decode(i)
 	return err
 }
 
-func (c *GobCodec) Encode(i interface{}) ([]byte, error) {
+func (c *GobSerialize) Serialize(i interface{}) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	err := enc.Encode(i)
