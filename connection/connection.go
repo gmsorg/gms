@@ -47,7 +47,7 @@ func (c *Connection) Read() (protocol.Imessage, error) {
 		return nil, errors.New("[Read] conn not exist")
 	}
 
-	message, err := c.messagePack.ReadUnPack(c.conn)
+	message, err := c.messagePack.ReadUnPackLen(c.conn)
 	if err != nil {
 		return nil, fmt.Errorf("Read %w", err)
 	}

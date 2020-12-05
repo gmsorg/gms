@@ -32,10 +32,6 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 
 	buffer := bytes.NewBuffer(result)
 
-	if err := binary.Write(buffer, binary.BigEndian, message.GetHeader()); err != nil {
-		return nil, err
-	}
-
 	serviceFuncL := len(message.GetServiceFunc())
 
 	extData := encodeExt(message.GetExt())
@@ -44,12 +40,24 @@ func (m *MessagePack) Pack(message Imessage) ([]byte, error) {
 	data := message.GetData()
 	dataL := len(data)
 
-	// 写入消息总长
-	totalL := (4 + serviceFuncL) + + (4 + extDataL) + (4 + dataL)
-	// fmt.Println("totleL:", totalL)
+	// 写入消息体总长
+	totalL := len(message.GetHeader()) + (4 + serviceFuncL) + + (4 + extDataL) + (4 + dataL)
+	// fmt.Println(message.GetMessageType(), "totleL:", totalL)
 	if err := binary.Write(buffer, binary.BigEndian, uint32(totalL)); err != nil {
 		return nil, err
 	}
+
+	// 写入header
+	if err := binary.Write(buffer, binary.BigEndian, message.GetHeader()); err != nil {
+		return nil, err
+	}
+
+	// // // 写入消息体总长
+	// // messageTotalL := (4 + serviceFuncL) + + (4 + extDataL) + (4 + dataL)
+	// // fmt.Println("totleL:", messageTotalL)
+	// if err := binary.Write(buffer, binary.BigEndian, uint32(messageTotalL)); err != nil {
+	// 	return nil, err
+	// }
 	// 写入方法名总长
 	if err := binary.Write(buffer, binary.BigEndian, uint32(serviceFuncL)); err != nil {
 		return nil, err
@@ -125,6 +133,18 @@ func decodeExt(l uint32, data []byte) (map[string]string, error) {
 	return m, nil
 }
 
+func (m *MessagePack) UnPackLen(binaryMessage []byte) (Imessage, error) {
+	fmt.Println(fmt.Sprintf("binaryMessage len:%v", len(binaryMessage)))
+	buffer := bytes.NewReader(binaryMessage[:])
+
+	var totalL uint32
+	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
+		return nil, err
+	}
+
+	return m.ReadUnPack(buffer)
+}
+
 /*
 todo err 处理
 UnPack 消息解码
@@ -132,8 +152,20 @@ UnPack 消息解码
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
+	fmt.Println(fmt.Sprintf("binaryMessage len:%v", len(binaryMessage)))
 	buffer := bytes.NewReader(binaryMessage[:])
 
+	return m.ReadUnPack(buffer)
+}
+
+func (m *MessagePack) ReadUnPackLen(buffer io.Reader) (Imessage, error) {
+	var totalL uint32
+	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
+		return nil, err
+	}
+	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
+		return nil, err
+	}
 	return m.ReadUnPack(buffer)
 }
 
@@ -141,6 +173,13 @@ func (m *MessagePack) ReadUnPack(buffer io.Reader) (Imessage, error) {
 
 	message := &Message{
 	}
+
+	// 解析消息总长度
+	var serviceFuncL, extL, dataL uint32
+	// var totalL, serviceFuncL, extL, dataL uint32
+	// if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
+	// 	return nil, err
+	// }
 
 	// 解析魔数 用于判断请求是否正确
 	_, err := io.ReadFull(buffer, message.Header[:1])
@@ -158,23 +197,19 @@ func (m *MessagePack) ReadUnPack(buffer io.Reader) (Imessage, error) {
 		return nil, err
 	}
 
-	// 解析消息总长度
-	var totalL, serviceFuncL, extL, dataL uint32
-	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
-		return nil, err
-	}
-
 	// 读取方法名长度
 	if err := binary.Read(buffer, binary.BigEndian, &serviceFuncL); err != nil {
 		return nil, err
 	}
 
 	// 读取方法名
-	serviceFuncData := make([]byte, serviceFuncL)
-	if l, err := io.ReadFull(buffer, serviceFuncData); l != int(serviceFuncL) || err != nil {
-		return nil, fmt.Errorf("read len 0 or %w", err)
+	if serviceFuncL > 0 {
+		serviceFuncData := make([]byte, serviceFuncL)
+		if l, err := io.ReadFull(buffer, serviceFuncData); l != int(serviceFuncL) || err != nil {
+			return nil, fmt.Errorf("read len 0 or %w", err)
+		}
+		message.serviceFunc = common.SliceByteToString(serviceFuncData)
 	}
-	message.serviceFunc = common.SliceByteToString(serviceFuncData)
 
 	// 读取扩展信息长度
 	if err := binary.Read(buffer, binary.BigEndian, &extL); err != nil {

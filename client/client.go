@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -52,8 +51,8 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 		return errors.New("can't find server")
 	}
 
-	// c.rw.Lock()
-	// defer c.rw.Unlock()
+	c.rw.Lock()
+	defer c.rw.Unlock()
 
 	connection := c.getCachedConnection(serverKey)
 
@@ -124,11 +123,11 @@ func netError(err error) bool {
 }
 
 func (c *Client) getCachedConnection(address string) connection.IConnection {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	// c.rw.Lock()
+	// defer c.rw.Unlock()
 
 	if connection, ok := c.connection[address]; ok {
-		fmt.Println("get ok", ok)
+		// fmt.Println("get ok", ok)
 		return connection
 	}
 	return c.generateClient(address)

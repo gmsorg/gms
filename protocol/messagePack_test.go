@@ -21,7 +21,7 @@ func TestMessagePack_Decode(t *testing.T) {
 	encodeData, err := mp.Pack(message)
 	fmt.Println(err)
 	fmt.Println("===============")
-	m, err := mp.UnPack(encodeData)
+	m, err := mp.UnPackLen(encodeData)
 	fmt.Println(err)
 	// fmt.Println(m.GetHeader())
 
@@ -66,6 +66,6 @@ func newMessage() Imessage {
 
 	message.SetExt(map[string]string{"id": "aa"})
 	message.SetData([]byte("hello"))
-	message.SetServiceFunc("GetServiceFunc")
+	// message.SetServiceFunc("GetServiceFunc")
 	return message
 }
