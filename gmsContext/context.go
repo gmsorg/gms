@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/gmsorg/gms/codec"
+	"github.com/gmsorg/gms/serialize"
 	"github.com/gmsorg/gms/protocol"
 )
 
@@ -33,8 +33,8 @@ func (c *Context) SetMessage(message protocol.Imessage) error {
 func (c *Context) Param(param interface{}) error {
 
 	// 获取指定的序列化器
-	codec := codec.GetCodec(c.message.GetSerializeType())
-	err := codec.Decode(c.message.GetData(), param)
+	codec := serialize.GetCodec(c.message.GetSerializeType())
+	err := codec.UnSerialize(c.message.GetData(), param)
 	if err != nil {
 		log.Println("[Param] error", err)
 		return err
@@ -43,8 +43,8 @@ func (c *Context) Param(param interface{}) error {
 }
 
 func (c *Context) Result(result interface{}) error {
-	codec := codec.GetCodec(c.message.GetSerializeType())
-	r, err := codec.Encode(result)
+	codec := serialize.GetCodec(c.message.GetSerializeType())
+	r, err := codec.Serialize(result)
 	// // todo 改为其他序列化方式
 	// r, err := json.Marshal(result)
 	if err != nil {

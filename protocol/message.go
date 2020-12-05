@@ -3,7 +3,7 @@ package protocol
 import (
 	"encoding/binary"
 
-	"github.com/gmsorg/gms/codec"
+	"github.com/gmsorg/gms/serialize"
 )
 
 /*
@@ -75,12 +75,12 @@ func (m *Message) SetCompressType(ct CompressType) {
 }
 
 // GetSerializeType returns serialization type of payload.
-func (m *Message) GetSerializeType() codec.CodecType {
-	return codec.CodecType((m.Header[4]))
+func (m *Message) GetSerializeType() serialize.SerializeType {
+	return serialize.SerializeType((m.Header[4]))
 }
 
 // SetSerializeType sets the serialization type.
-func (m *Message) SetSerializeType(ct codec.CodecType) {
+func (m *Message) SetSerializeType(ct serialize.SerializeType) {
 	m.Header[4] = byte(ct)
 }
 

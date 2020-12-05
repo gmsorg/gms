@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/gmsorg/gms/codec"
+	"github.com/gmsorg/gms/serialize"
 	"github.com/gmsorg/gms/connection"
 	"github.com/gmsorg/gms/discovery"
 	"github.com/gmsorg/gms/protocol"
@@ -19,7 +19,7 @@ type Client struct {
 	selector    selector.ISelector
 	connection  map[string]connection.IConnection
 	messagePack protocol.IMessagePack
-	codecType   codec.CodecType
+	codecType   serialize.SerializeType
 }
 
 /*
@@ -30,15 +30,15 @@ func NewClient(discovery discovery.IDiscover) (IClient, error) {
 		discovery:   discovery,
 		connection:  make(map[string]connection.IConnection),
 		messagePack: protocol.NewMessagePack(),
-		codecType:   codec.Msgpack,
+		codecType:   serialize.Msgpack,
 	}
 
 	client.selector = selector.NewRandomSelect(discovery)
 	return client, nil
 }
 
-func (c *Client) SetCodecType(codecType codec.CodecType) error {
-	if codec := codec.GetCodec(c.codecType); codec == nil {
+func (c *Client) SetSerializeType(codecType serialize.SerializeType) error {
+	if codec := serialize.GetCodec(c.codecType); codec == nil {
 		return errors.New("unsupped codecType,only supped['JSON','Msgpack','Gob']")
 	}
 	c.codecType = codecType
@@ -64,10 +64,10 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	}
 
 	// 获取指定的序列化器
-	codecReq := codec.GetCodec(c.codecType)
+	codecReq := serialize.GetCodec(c.codecType)
 
 	// 把 request 序列化成字节数组
-	codecByte, err := codecReq.Encode(request)
+	codecByte, err := codecReq.Serialize(request)
 	// fmt.Println(string(codecByte))
 	if err != nil {
 		log.Println(err)
@@ -107,9 +107,9 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 		return err
 	}
 
-	codecRes := codec.GetCodec(messageRes.GetSerializeType())
+	codecRes := serialize.GetCodec(messageRes.GetSerializeType())
 	// 返序列化返回结果 成response
-	codecRes.Decode(messageRes.GetData(), response)
+	codecRes.UnSerialize(messageRes.GetData(), response)
 	return nil
 }
 

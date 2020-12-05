@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"github.com/gmsorg/gms/codec"
+	"github.com/gmsorg/gms/serialize"
 )
 
 /*
@@ -35,9 +35,9 @@ type Imessage interface {
 	SetCompressType(ct CompressType)
 
 	// 获取序列化类型
-	GetSerializeType() codec.CodecType
+	GetSerializeType() serialize.SerializeType
 	// 设置序列化类型
-	SetSerializeType(ct codec.CodecType)
+	SetSerializeType(ct serialize.SerializeType)
 
 	// 获取消息序号
 	GetSeq() uint64
