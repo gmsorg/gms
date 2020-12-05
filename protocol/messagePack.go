@@ -132,7 +132,6 @@ func (m *MessagePack) ReadUnPackLen(buffer io.Reader) (Imessage, error) {
 }
 
 func (m *MessagePack) ReadUnPack(buffer io.Reader) (Imessage, error) {
-
 	message := &Message{
 	}
 

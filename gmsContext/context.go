@@ -45,8 +45,6 @@ func (c *Context) Param(param interface{}) error {
 func (c *Context) Result(result interface{}) error {
 	serialize := serialize.GetSerialize(c.message.GetSerializeType())
 	r, err := serialize.Serialize(result)
-	// // todo 改为其他序列化方式
-	// r, err := json.Marshal(result)
 	if err != nil {
 		log.Println(err)
 	}
