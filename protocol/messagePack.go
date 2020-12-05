@@ -134,7 +134,7 @@ func decodeExt(l uint32, data []byte) (map[string]string, error) {
 }
 
 func (m *MessagePack) UnPackLen(binaryMessage []byte) (Imessage, error) {
-	fmt.Println(fmt.Sprintf("binaryMessage len:%v", len(binaryMessage)))
+	// fmt.Println(fmt.Sprintf("binaryMessage len:%v", len(binaryMessage)))
 	buffer := bytes.NewReader(binaryMessage[:])
 
 	var totalL uint32
@@ -152,7 +152,7 @@ UnPack 消息解码
 扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
-	fmt.Println(fmt.Sprintf("binaryMessage len:%v", len(binaryMessage)))
+	// fmt.Println(fmt.Sprintf("binaryMessage len:%v", len(binaryMessage)))
 	buffer := bytes.NewReader(binaryMessage[:])
 
 	return m.ReadUnPack(buffer)

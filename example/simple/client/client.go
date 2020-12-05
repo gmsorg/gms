@@ -37,10 +37,10 @@ func main() {
 	for i := 0; i < 10; i++ {
 		waitGroup.Add(1)
 		go func(i int) {
-			for j := 0; j < 100; j++ {
+			for j := 0; j < 10; j++ {
 				rand.Seed(time.Now().UnixNano())
-				req := &model.AdditionReq{NumberA: 100, NumberB: 200}
-				// req := &model.AdditionReq{NumberA: rand.Intn(100), NumberB: rand.Intn(200)}
+				// req := &model.AdditionReq{NumberA: 100, NumberB: 200}
+				req := &model.AdditionReq{NumberA: rand.Intn(100), NumberB: rand.Intn(200)}
 
 				// 接收返回值的对象
 				res := &model.AdditionRes{}
