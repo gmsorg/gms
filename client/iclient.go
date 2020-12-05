@@ -5,7 +5,7 @@ import "github.com/gmsorg/gms/serialize"
 type IClient interface {
 	Call(serviceFunc string, request interface{}, response interface{}) error
 
-	SetSerializeType(codecType serialize.SerializeType) error
+	SetSerializeType(serializeType serialize.SerializeType) error
 
 	Close()
 }

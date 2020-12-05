@@ -14,12 +14,12 @@ import (
 )
 
 type Client struct {
-	rw          sync.RWMutex
-	discovery   discovery.IDiscover
-	selector    selector.ISelector
-	connection  map[string]connection.IConnection
-	messagePack protocol.IMessagePack
-	codecType   serialize.SerializeType
+	rw            sync.RWMutex
+	discovery     discovery.IDiscover
+	selector      selector.ISelector
+	connection    map[string]connection.IConnection
+	messagePack   protocol.IMessagePack
+	serializeType serialize.SerializeType
 }
 
 /*
@@ -27,21 +27,21 @@ NewClient 初始化客户端
 */
 func NewClient(discovery discovery.IDiscover) (IClient, error) {
 	client := &Client{
-		discovery:   discovery,
-		connection:  make(map[string]connection.IConnection),
-		messagePack: protocol.NewMessagePack(),
-		codecType:   serialize.Msgpack,
+		discovery:     discovery,
+		connection:    make(map[string]connection.IConnection),
+		messagePack:   protocol.NewMessagePack(),
+		serializeType: serialize.Msgpack,
 	}
 
 	client.selector = selector.NewRandomSelect(discovery)
 	return client, nil
 }
 
-func (c *Client) SetSerializeType(codecType serialize.SerializeType) error {
-	if codec := serialize.GetCodec(c.codecType); codec == nil {
-		return errors.New("unsupped codecType,only supped['JSON','Msgpack','Gob']")
+func (c *Client) SetSerializeType(serializeType serialize.SerializeType) error {
+	if serialize := serialize.GetSerialize(c.serializeType); serialize == nil {
+		return errors.New("unsupped serializeType,only supped['JSON','Msgpack','Gob']")
 	}
-	c.codecType = codecType
+	c.serializeType = serializeType
 	return nil
 }
 
@@ -64,10 +64,10 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	}
 
 	// 获取指定的序列化器
-	codecReq := serialize.GetCodec(c.codecType)
+	req := serialize.GetSerialize(c.serializeType)
 
 	// 把 request 序列化成字节数组
-	codecByte, err := codecReq.Serialize(request)
+	codecByte, err := req.Serialize(request)
 	// fmt.Println(string(codecByte))
 	if err != nil {
 		log.Println(err)
@@ -77,7 +77,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	message := protocol.NewMessage()
 	message.SetServiceFunc(serviceFunc)
 	message.SetData(codecByte)
-	message.SetSerializeType(c.codecType)
+	message.SetSerializeType(c.serializeType)
 	// todo seq
 	// message.SetSeq()
 	// message.SetCompressType()
@@ -107,9 +107,9 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 		return err
 	}
 
-	codecRes := serialize.GetCodec(messageRes.GetSerializeType())
+	res := serialize.GetSerialize(messageRes.GetSerializeType())
 	// 返序列化返回结果 成response
-	codecRes.UnSerialize(messageRes.GetData(), response)
+	res.UnSerialize(messageRes.GetData(), response)
 	return nil
 }
 

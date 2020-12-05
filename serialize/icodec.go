@@ -21,9 +21,9 @@ var (
 	}
 )
 
-func GetCodec(codecType SerializeType) ISerialize {
-	if codec, ok := Serializes[codecType]; ok {
-		return codec
+func GetSerialize(serializeType SerializeType) ISerialize {
+	if serialize, ok := Serializes[serializeType]; ok {
+		return serialize
 	}
 	return nil
 }
