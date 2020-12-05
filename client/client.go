@@ -51,6 +51,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 		return errors.New("can't find server")
 	}
 
+	//todo 锁需要优化
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
