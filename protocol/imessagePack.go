@@ -1,8 +1,6 @@
 package protocol
 
-import (
-	"net"
-)
+import "io"
 
 /*
 IMessagePack 消息封包、解包
@@ -12,6 +10,6 @@ type IMessagePack interface {
 	Pack(msg Imessage) ([]byte, error)
 	// 请求消息解包方法
 	UnPack([]byte) (Imessage, error)
-	//	从conn中读取数据解包
-	ReadUnPack(net.Conn) (Imessage, error)
+	// 客户端从conn中读取数据解包
+	ReadUnPackLen(io.Reader) (Imessage, error)
 }

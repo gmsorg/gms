@@ -49,14 +49,14 @@ func (r *RedisRegistePlugin) Start() error {
 
 	err = r.kv.Put(common.BasePath, []byte(common.BasePath), &store.WriteOptions{IsDir: true})
 	if err != nil {
-		fmt.Errorf("[RedisRegistePlugin] put BasePath error: %v", err)
+		fmt.Errorf("[RedisRegistePlugin] put BasePath error: %w", err)
 		return err
 	}
 
 	nodeName := fmt.Sprintf("%v/%v", common.BasePath, r.GmsServerName)
 	err = r.kv.Put(nodeName, []byte(r.GmsServerName), &store.WriteOptions{IsDir: true})
 	if err != nil {
-		fmt.Errorf("[RedisRegistePlugin] put nodeName: %v error: %v", nodeName, err)
+		fmt.Errorf("[RedisRegistePlugin] put nodeName: %v error: %w", nodeName, err)
 	}
 
 	return nil
@@ -95,7 +95,7 @@ func (r *RedisRegistePlugin) registeService() error {
 	nodeName := fmt.Sprintf("%v/%v/%v", common.BasePath, r.GmsServerName, r.GmsServiceAddress)
 	err := r.kv.Put(nodeName, []byte(r.GmsServiceAddress), &store.WriteOptions{TTL: r.UpdateInterval * 2})
 	if err != nil {
-		return fmt.Errorf("[RedisRegistePlugin] put nodeName: %v error: %v", nodeName, err)
+		return fmt.Errorf("[RedisRegistePlugin] put nodeName: %v error: %w", nodeName, err)
 	}
 	return nil
 }

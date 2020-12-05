@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -56,9 +55,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	defer c.rw.Unlock()
 
 	connection := c.getCachedConnection(serverKey)
-	if connection == nil {
-		connection = c.generateClient(serverKey)
-	}
+
 	if connection == nil {
 		// 如果是连接错误需要清除缓存的conn对象 并清除service
 		c.cleanConn(serverKey)
@@ -70,12 +67,20 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 
 	// 把 request 序列化成字节数组
 	codecByte, err := codecReq.Encode(request)
+	// fmt.Println(string(codecByte))
 	if err != nil {
 		log.Println(err)
 	}
 
 	// 组装消息
-	message := protocol.NewMessage([]byte(serviceFunc), codecByte, c.codecType)
+	message := protocol.NewMessage()
+	message.SetServiceFunc(serviceFunc)
+	message.SetData(codecByte)
+	message.SetSerializeType(c.codecType)
+	// todo seq
+	// message.SetSeq()
+	// message.SetCompressType()
+	message.SetMessageType(protocol.Request)
 
 	// 打包消息
 	eb, err := c.messagePack.Pack(message)
@@ -101,7 +106,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 		return err
 	}
 
-	codecRes := codec.GetCodec(messageRes.GetCodecType())
+	codecRes := codec.GetCodec(messageRes.GetSerializeType())
 	// 返序列化返回结果 成response
 	codecRes.Decode(messageRes.GetData(), response)
 	return nil
@@ -118,24 +123,19 @@ func netError(err error) bool {
 }
 
 func (c *Client) getCachedConnection(address string) connection.IConnection {
-	// c.rw.RLock()
-	// defer c.rw.RUnlock()
-	if connection, ok := c.connection[address]; ok {
-		fmt.Println("get ok", ok)
-		return connection
-	}
-	return nil
-}
-
-func (c *Client) generateClient(address string) connection.IConnection {
 	// c.rw.Lock()
 	// defer c.rw.Unlock()
 
+	if connection, ok := c.connection[address]; ok {
+		// fmt.Println("get ok", ok)
+		return connection
+	}
+	return c.generateClient(address)
+}
+
+func (c *Client) generateClient(address string) connection.IConnection {
 	newConnection := connection.NewConnection(address)
 	c.connection[address] = newConnection
-	log.Println("XXXXXX", address, newConnection, "XXXXXX")
-	log.Println(c.connection)
-	log.Println("XXXXXX", address, newConnection, "XXXXXX")
 	return newConnection
 }
 

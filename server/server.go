@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"log"
@@ -64,6 +65,22 @@ func (s *server) InitServe(port int) {
 		// codec:     codec,
 	}
 
+	// gent 消息编解码
+	encoderConfig := gnet.EncoderConfig{
+		ByteOrder:                       binary.BigEndian,
+		LengthFieldLength:               4,
+		LengthAdjustment:                0,
+		LengthIncludesLengthFieldLength: false,
+	}
+	decoderConfig := gnet.DecoderConfig{
+		ByteOrder:           binary.BigEndian,
+		LengthFieldOffset:   0,
+		LengthFieldLength:   4,
+		LengthAdjustment:    0,
+		InitialBytesToStrip: 4,
+	}
+	codec := gnet.NewLengthFieldBasedFrameCodec(encoderConfig, decoderConfig)
+
 	if port < 1 {
 		port = common.GmsPort
 	}
@@ -72,14 +89,14 @@ func (s *server) InitServe(port int) {
 		fmt.Sprintf("tcp://:%v", port),
 		gnet.WithMulticore(true),
 		gnet.WithTCPKeepAlive(time.Minute*5), // todo 需要确定是否对长连接有影响
-		// gnet.WithCodec(codec)
+		gnet.WithCodec(codec),
 	))
 }
 
 /*
 启动服务
 */
-func (s *server) Run( ip string, port int) {
+func (s *server) Run(ip string, port int) {
 	log.Println("[gmsServer] start run gms gmsServer")
 	// 启动所有插件
 	s.plugins.Start()
@@ -133,10 +150,10 @@ func (s *server) GetRouter(handlerName string) (gmsContext.Controller, error) {
 // func (s *server) HandlerMessage(message protocol.Imessage) (gmsContext.Context, error) {
 func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error) {
 	// log.Println(string(message.GetExt()))
-	controller, err := s.GetRouter(string(message.GetExt()))
+	controller, err := s.GetRouter(message.GetServiceFunc())
 	if err != nil {
 		log.Println("[HandlerMessage] Router:", message.GetExt(), " not found", err)
-		return nil, fmt.Errorf("No Router", err)
+		return nil, fmt.Errorf("No Router %w", err)
 	}
 
 	// todo 可以考虑使用 pool
@@ -146,7 +163,7 @@ func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context,
 	err = controller(context)
 	if err != nil {
 		log.Println(err)
-		return nil, fmt.Errorf(" fail", err)
+		return nil, fmt.Errorf(" fail %w", err)
 	}
 
 	// resultData, err := context.GetResult()

@@ -14,6 +14,7 @@ import (
 type Connection struct {
 	conn        net.Conn
 	messagePack protocol.IMessagePack
+	seq         int64
 }
 
 func NewConnection(address string) IConnection {
@@ -46,9 +47,9 @@ func (c *Connection) Read() (protocol.Imessage, error) {
 		return nil, errors.New("[Read] conn not exist")
 	}
 
-	message, err := c.messagePack.ReadUnPack(c.conn)
+	message, err := c.messagePack.ReadUnPackLen(c.conn)
 	if err != nil {
-		return nil, fmt.Errorf("Read %v", err)
+		return nil, fmt.Errorf("Read %w", err)
 	}
 
 	return message, nil

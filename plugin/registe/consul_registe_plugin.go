@@ -41,14 +41,14 @@ func (c *ConsulRegistePlugin) Start() error {
 
 	err = c.kv.Put(common.BasePath, []byte(common.BasePath), &store.WriteOptions{IsDir: true})
 	if err != nil {
-		fmt.Errorf("[ConsulRegistePlugin] put BasePath error: %v", err)
+		fmt.Errorf("[ConsulRegistePlugin] put BasePath error: %w", err)
 		return err
 	}
 
 	nodeName := fmt.Sprintf("%v/%v", common.BasePath, c.GmsServerName)
 	err = c.kv.Put(nodeName, []byte(c.GmsServerName), &store.WriteOptions{IsDir: true})
 	if err != nil {
-		fmt.Errorf("[ConsulRegistePlugin] put nodeName: %v error: %v", nodeName, err)
+		fmt.Errorf("[ConsulRegistePlugin] put nodeName: %v error: %w", nodeName, err)
 	}
 
 	return nil
@@ -93,7 +93,7 @@ func (c *ConsulRegistePlugin) registeService() error {
 	nodeName := fmt.Sprintf("%v/%v/%v", common.BasePath, c.GmsServerName, c.GmsServiceAddress)
 	err := c.kv.Put(nodeName, []byte(c.GmsServiceAddress), &store.WriteOptions{TTL: c.UpdateInterval * 2})
 	if err != nil {
-		return fmt.Errorf("[ConsulRegistePlugin] put nodeName: %v error: %v", nodeName, err)
+		return fmt.Errorf("[ConsulRegistePlugin] put nodeName: %v error: %w", nodeName, err)
 	}
 	return nil
 }
