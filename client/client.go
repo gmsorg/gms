@@ -6,11 +6,11 @@ import (
 	"net"
 	"sync"
 
-	"github.com/akkagao/gms/codec"
-	"github.com/akkagao/gms/connection"
-	"github.com/akkagao/gms/discovery"
-	"github.com/akkagao/gms/protocol"
-	"github.com/akkagao/gms/selector"
+	"github.com/gmsorg/gms/codec"
+	"github.com/gmsorg/gms/connection"
+	"github.com/gmsorg/gms/discovery"
+	"github.com/gmsorg/gms/protocol"
+	"github.com/gmsorg/gms/selector"
 )
 
 type Client struct {

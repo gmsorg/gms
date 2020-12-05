@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/akkagao/gms/common"
+	"github.com/gmsorg/gms/common"
 )
 
 /*

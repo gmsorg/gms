@@ -8,8 +8,8 @@ import (
 	"github.com/panjf2000/gnet"
 	"github.com/panjf2000/gnet/pool/goroutine"
 
-	"github.com/akkagao/gms/common"
-	"github.com/akkagao/gms/protocol"
+	"github.com/gmsorg/gms/common"
+	"github.com/gmsorg/gms/protocol"
 )
 
 type gmsHandler struct {

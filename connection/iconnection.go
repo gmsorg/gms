@@ -1,6 +1,6 @@
 package connection
 
-import "github.com/akkagao/gms/protocol"
+import "github.com/gmsorg/gms/protocol"
 
 type IConnection interface {
 	Send(reqData []byte) error

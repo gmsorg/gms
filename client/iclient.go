@@ -1,6 +1,6 @@
 package client
 
-import "github.com/akkagao/gms/codec"
+import "github.com/gmsorg/gms/codec"
 
 type IClient interface {
 	Call(serviceFunc string, request interface{}, response interface{}) error

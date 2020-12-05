@@ -1,6 +1,6 @@
 package gmsContext
 
-import "github.com/akkagao/gms/protocol"
+import "github.com/gmsorg/gms/protocol"
 
 type Controller func(c *Context) error
 

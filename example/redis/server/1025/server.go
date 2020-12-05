@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/akkagao/gms"
-	"github.com/akkagao/gms/example/model"
-	"github.com/akkagao/gms/plugin/registe"
+	"github.com/gmsorg/gms"
+	"github.com/gmsorg/gms/example/model"
+	"github.com/gmsorg/gms/plugin/registe"
 
-	"github.com/akkagao/gms/gmsContext"
+	"github.com/gmsorg/gms/gmsContext"
 )
 
 func main() {

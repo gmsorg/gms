@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/akkagao/gms/client"
-	"github.com/akkagao/gms/codec"
-	"github.com/akkagao/gms/discovery"
-	"github.com/akkagao/gms/example/model"
+	"github.com/gmsorg/gms/client"
+	"github.com/gmsorg/gms/codec"
+	"github.com/gmsorg/gms/discovery"
+	"github.com/gmsorg/gms/example/model"
 )
 
 /*

@@ -3,10 +3,10 @@ package gms
 import (
 	"log"
 
-	"github.com/akkagao/gms/common"
-	"github.com/akkagao/gms/gmsContext"
-	"github.com/akkagao/gms/plugin"
-	"github.com/akkagao/gms/server"
+	"github.com/gmsorg/gms/common"
+	"github.com/gmsorg/gms/gmsContext"
+	"github.com/gmsorg/gms/plugin"
+	"github.com/gmsorg/gms/server"
 )
 
 type gms struct {

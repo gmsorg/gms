@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/akkagao/gms/plugin"
-	"github.com/akkagao/gms/plugin/registe"
+	"github.com/gmsorg/gms/plugin"
+	"github.com/gmsorg/gms/plugin/registe"
 )
 
 func TestNewEtcd3Discover(t *testing.T) {

@@ -1,6 +1,6 @@
 package protocol
 
-import "github.com/akkagao/gms/common"
+import "github.com/gmsorg/gms/common"
 
 const (
 	magicNumber byte = 0x88

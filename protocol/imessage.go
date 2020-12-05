@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"github.com/akkagao/gms/codec"
+	"github.com/gmsorg/gms/codec"
 )
 
 /*

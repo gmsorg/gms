@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/akkagao/gms/codec"
-	"github.com/akkagao/gms/protocol"
+	"github.com/gmsorg/gms/codec"
+	"github.com/gmsorg/gms/protocol"
 )
 
 type Context struct {

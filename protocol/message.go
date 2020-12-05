@@ -3,7 +3,7 @@ package protocol
 import (
 	"encoding/binary"
 
-	"github.com/akkagao/gms/codec"
+	"github.com/gmsorg/gms/codec"
 )
 
 /*

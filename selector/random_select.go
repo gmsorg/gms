@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/akkagao/gms/discovery"
+	"github.com/gmsorg/gms/discovery"
 )
 
 type RandomSelect struct {

@@ -11,7 +11,7 @@ import (
 	"github.com/abronan/valkeyrie/store"
 	"github.com/abronan/valkeyrie/store/redis"
 
-	"github.com/akkagao/gms/common"
+	"github.com/gmsorg/gms/common"
 )
 
 func init() {

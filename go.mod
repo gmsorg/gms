@@ -1,4 +1,4 @@
-module github.com/akkagao/gms
+module github.com/gmsorg/gms
 
 go 1.15
 

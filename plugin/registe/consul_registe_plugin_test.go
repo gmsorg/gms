@@ -3,7 +3,7 @@ package registe
 import (
 	"testing"
 
-	"github.com/akkagao/gms/plugin"
+	"github.com/gmsorg/gms/plugin"
 )
 
 func TestConsulRegistePlugin_Start(t *testing.T) {

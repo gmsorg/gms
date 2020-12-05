@@ -7,8 +7,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/akkagao/gms/common"
-	"github.com/akkagao/gms/protocol"
+	"github.com/gmsorg/gms/common"
+	"github.com/gmsorg/gms/protocol"
 )
 
 type Connection struct {

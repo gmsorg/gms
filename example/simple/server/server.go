@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/akkagao/gms"
-	"github.com/akkagao/gms/example/model"
-	"github.com/akkagao/gms/gmsContext"
+	"github.com/gmsorg/gms"
+	"github.com/gmsorg/gms/example/model"
+	"github.com/gmsorg/gms/gmsContext"
 )
 
 func main() {

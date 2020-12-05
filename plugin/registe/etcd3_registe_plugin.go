@@ -9,8 +9,8 @@ import (
 	"github.com/abronan/valkeyrie/store"
 	etcd "github.com/abronan/valkeyrie/store/etcd/v3"
 
-	"github.com/akkagao/gms/common"
-	"github.com/akkagao/gms/plugin"
+	"github.com/gmsorg/gms/common"
+	"github.com/gmsorg/gms/plugin"
 )
 
 func init() {
