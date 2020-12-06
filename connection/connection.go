@@ -3,6 +3,7 @@ package connection
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gmsorg/gms/common"
 	"github.com/gmsorg/gms/protocol"
+	"github.com/gmsorg/gms/serialize"
 )
 
 const ReaderBuffsize = 16 * 1024
@@ -46,16 +48,22 @@ func NewConnection(address string) IConnection {
 	return c
 }
 
-func (c *Connection) Send(reqData []byte) (protocol.Imessage, error) {
+func (c *Connection) Send(reqData []byte, response interface{}) error {
+	// c.rw.Lock()
+	// defer c.rw.Unlock()
+
 	wait, err := c.do(reqData)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	select {
 	case m := <-wait:
-		return m, nil
+		res := serialize.GetSerialize(m.GetSerializeType())
+		// 返序列化返回结果 成response
+		res.UnSerialize(m.GetData(), response)
 	}
+	return nil
 }
 
 func (c *Connection) GetSeq() uint64 {
@@ -77,6 +85,7 @@ func (c *Connection) do(reqData []byte) (chan protocol.Imessage, error) {
 	c.rw.Lock()
 	// fmt.Println("获取写锁成功")
 	c.wait[seq] = wait
+	fmt.Println("set seq:", seq)
 	c.rw.Unlock()
 	// fmt.Println("释放写锁成功")
 
@@ -115,12 +124,13 @@ func (c *Connection) read() {
 			break
 		}
 
-		// fmt.Println("seq", message.GetSeq())
+		fmt.Println("get seq:", message.GetSeq())
 		//
 		// fmt.Println("获取读锁")
 
 		c.rw.RLock()
 		wait, ok := c.wait[message.GetSeq()]
+		delete(c.wait, message.GetSeq())
 		c.rw.RUnlock()
 
 		// fmt.Println("获取读锁2")

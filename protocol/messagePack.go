@@ -122,6 +122,11 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 
 func (m *MessagePack) ReadUnPackLen(buffer io.Reader) (Imessage, error) {
 	var totalL uint32
+
+	// var l [4]byte
+	// if n,err := io.ReadFull(buffer, l[:]); n<1 || err != nil {
+	// 	return nil,err
+	// }
 	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
 		return nil, err
 	}
