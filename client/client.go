@@ -67,23 +67,24 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 	message.SetData(serializeByte)
 	message.SetSerializeType(c.serializeType)
 	// todo seq
-	message.SetSeq(connection.GetSeq())
+	// message.SetSeq(connection.GetSeq())
 	message.SetCompressType(protocol.None)
 	message.SetMessageType(protocol.Request)
 
-	// 打包消息
-	eb, err := c.messagePack.Pack(message, true)
-	if err != nil {
-		// 错误处理
-		log.Println(err)
-	}
+	// // 打包消息
+	// eb, err := c.messagePack.Pack(message, true)
+	// if err != nil {
+	// 	// 错误处理
+	// 	log.Println(err)
+	// }
 
 	// todo 改为connection锁
 	// c.rw.Lock()
 	// defer c.rw.Unlock()
 
 	// 发送打包好的消息
-	err = connection.Send(eb, response)
+	// err = connection.Send(eb, response)
+	err = connection.SendM(message, response)
 
 	if err != nil {
 		log.Println("call-error:", err)

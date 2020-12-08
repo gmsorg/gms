@@ -3,7 +3,6 @@ package connection
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -17,6 +16,7 @@ import (
 const ReaderBuffsize = 16 * 1024
 
 type Connection struct {
+	connId          int
 	conn        net.Conn
 	messagePack protocol.IMessagePack
 	seq         uint64
@@ -46,6 +46,68 @@ func NewConnection(address string) IConnection {
 	go c.read()
 
 	return c
+}
+
+func (c *Connection) SetConnId(connId int) {
+	c.connId = connId
+}
+
+func (c *Connection) SendM(message protocol.Imessage, response interface{}) error {
+
+	if c.conn == nil {
+		return errors.New("[Connection.Send] conn not exist")
+	}
+
+	wait, err := c.doM(message)
+
+	if err != nil {
+		return err
+	}
+
+	select {
+	case m := <-wait:
+		res := serialize.GetSerialize(m.GetSerializeType())
+		// 返序列化返回结果 成response
+		res.UnSerialize(m.GetData(), response)
+	}
+	return nil
+}
+
+func (c *Connection) doM(message protocol.Imessage) (chan protocol.Imessage, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("[Connection.Send]recover send data error:%v", err)
+		}
+	}()
+
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
+	seq := c.seq
+	c.seq++
+	message.SetSeq(seq)
+
+	wait := make(chan protocol.Imessage)
+	// fmt.Println("获取写锁")
+
+	// fmt.Println("获取写锁成功")
+	c.wait[seq] = wait
+	// fmt.Println("set seq:", seq)
+	// fmt.Println("释放写锁成功")
+
+	// 打包消息
+	eb, err := c.messagePack.Pack(message, true)
+	if err != nil {
+		delete(c.wait, seq)
+		// 错误处理
+		log.Println(err)
+	}
+
+	_, err = c.conn.Write(eb)
+	if err != nil {
+		return nil, err
+	}
+	return wait, nil
 }
 
 func (c *Connection) Send(reqData []byte, response interface{}) error {
@@ -85,7 +147,7 @@ func (c *Connection) do(reqData []byte) (chan protocol.Imessage, error) {
 	c.rw.Lock()
 	// fmt.Println("获取写锁成功")
 	c.wait[seq] = wait
-	fmt.Println("set seq:", seq)
+	// fmt.Println("set seq:", seq)
 	c.rw.Unlock()
 	// fmt.Println("释放写锁成功")
 
@@ -124,7 +186,7 @@ func (c *Connection) read() {
 			break
 		}
 
-		fmt.Println("get seq:", message.GetSeq())
+		// fmt.Println("get seq:", message.GetSeq())
 		//
 		// fmt.Println("获取读锁")
 

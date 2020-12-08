@@ -27,9 +27,9 @@ func TestMessage(t *testing.T) {
 	fmt.Println("GetMessageType ResponseError", message.GetMessageType())
 
 	seq := rand.Int63n(1000000)
-	fmt.Println("set seq:", seq)
+	// fmt.Println("set seq:", seq)
 	message.SetSeq(uint64(seq))
-	fmt.Println("get seq:", message.GetSeq())
+	// fmt.Println("get seq:", message.GetSeq())
 
 	message.SetExt(nil)
 	message.SetData([]byte("hello"))

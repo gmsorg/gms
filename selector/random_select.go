@@ -54,7 +54,8 @@ func (r *RandomSelect) SelectConn() (connection.IConnection, error) {
 	rand.Seed(time.Now().UnixNano())
 	address := servers[rand.Intn(size)]
 
-	key := fmt.Sprintf("%v-%v", rand.Intn(10), address)
+	connId := rand.Intn(10)
+	key := fmt.Sprintf("%v-%v", connId, address)
 	// key := address
 
 	if gmsConn, ok := r.connection[key]; ok {
@@ -63,6 +64,7 @@ func (r *RandomSelect) SelectConn() (connection.IConnection, error) {
 	}
 
 	gmsConn := connection.NewConnection(address)
+	gmsConn.SetConnId(connId)
 	r.connection[key] = gmsConn
 
 	return gmsConn, err

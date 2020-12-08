@@ -45,6 +45,7 @@ func (gh *gmsHandler) handle(frame []byte, c gnet.Conn) {
 	if err != nil {
 		log.Println(err)
 	}
+
 	// 调用用户方法
 	context, err := gh.gmsServer.HandlerMessage(message)
 	if err != nil {
@@ -67,6 +68,7 @@ func (gh *gmsHandler) handle(frame []byte, c gnet.Conn) {
 	if err != nil {
 		log.Println("[gmsHandler handle] error: %v", err)
 	}
+	// fmt.Println(resultMessage.GetSeq())
 	// 给客户端返回处理结果
 	c.AsyncWrite(rb)
 }

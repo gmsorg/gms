@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/gmsorg/gms"
 	"github.com/gmsorg/gms/example/model"
 	"github.com/gmsorg/gms/gmsContext"
@@ -29,8 +27,7 @@ func Addition(c *gmsContext.Context) error {
 	additionRes := &model.AdditionRes{}
 	additionRes.Result = additionReq.NumberA + additionReq.NumberB
 
-	fmt.Println(additionRes.Result)
-
+	// fmt.Println(additionRes.Result)
 	// 返回结果
 	c.Result(additionRes)
 	return nil

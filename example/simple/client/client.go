@@ -37,7 +37,7 @@ func main() {
 	// 设置 Msgpack 序列化器，默认也是 Msgpack
 	additionClient.SetSerializeType(serialize.Msgpack)
 
-	cs, t := 10, 10
+	cs, t := 100, 100
 	var callt, callOldt time.Duration
 	{
 		start := time.Now()
@@ -58,9 +58,9 @@ func call(additionClient client.IClient, cs, t int) {
 	for i := 0; i < cs; i++ {
 		waitGroup.Add(1)
 		go func(i int) {
-			fmt.Println("启动：", i)
+			// fmt.Println("启动：", i)
 			for j := 0; j < t; j++ {
-				fmt.Println("启动：", i, "-", j)
+				// fmt.Println("启动：", i, "-", j)
 				rand.Seed(time.Now().UnixNano())
 				// req := &model.AdditionReq{NumberA: 100, NumberB: 200}
 				req := &model.AdditionReq{NumberA: rand.Intn(100), NumberB: rand.Intn(200)}
@@ -73,7 +73,8 @@ func call(additionClient client.IClient, cs, t int) {
 				if err != nil {
 					log.Println(err)
 				}
-				log.Println(fmt.Sprintf("call %v-%v : %d+%d=%d", i, j, req.NumberA, req.NumberB, res.Result))
+				// log.Println(fmt.Sprintf("call %v-%v : %d+%d=%d  right:%v", i, j, req.NumberA, req.NumberB, res.Result, res.Result == req.NumberA+req.NumberB))
+				// log.Println(fmt.Sprintf(" right:%v", res.Result == req.NumberA+req.NumberB))
 			}
 			waitGroup.Done()
 		}(i)
