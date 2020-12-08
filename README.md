@@ -51,9 +51,9 @@ type AdditionRes struct {
 package main
 
 import (
-	"github.com/akkagao/gms"
-	"github.com/akkagao/gms/example/model"
-	"github.com/akkagao/gms/gmsContext"
+	"github.com/gmsorg/gms"
+	"github.com/gmsorg/gms/example/model"
+	"github.com/gmsorg/gms/gmsContext"
 )
 
 func main() {
@@ -92,10 +92,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/akkagao/gms/client"
-	"github.com/akkagao/gms/codec"
-	"github.com/akkagao/gms/discovery"
-	"github.com/akkagao/gms/example/model"
+	"github.com/gmsorg/gms/client"
+	"github.com/gmsorg/gms/codec"
+	"github.com/gmsorg/gms/discovery"
+	"github.com/gmsorg/gms/example/model"
 )
 
 /*

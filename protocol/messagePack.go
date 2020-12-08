@@ -25,7 +25,6 @@ func NewMessagePack() IMessagePack {
 /*
 Pack 消息编码
 消息格式
-扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) Pack(message Imessage, writeTotalLen bool) ([]byte, error) {
 	result := make([]byte, 0)
@@ -38,6 +37,13 @@ func (m *MessagePack) Pack(message Imessage, writeTotalLen bool) ([]byte, error)
 	extDataL := len(extData)
 
 	data := message.GetData()
+
+	if message.GetCompressType() == Gzip {
+		// todo 处理消息压缩
+	} else if message.GetCompressType() != None {
+		return nil, errors.New(fmt.Sprintf("compressType error %v", message.GetCompressType()))
+	}
+
 	dataL := len(data)
 
 	if writeTotalLen {
@@ -106,7 +112,6 @@ func (m *MessagePack) UnPackLen(binaryMessage []byte) (Imessage, error) {
 todo err 处理
 UnPack 消息解码
 消息格式
-扩展数据长度|主体数据长度|扩展数据|主体数据
 */
 func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 	// fmt.Println(fmt.Sprintf("binaryMessage len:%v", len(binaryMessage)))
@@ -117,6 +122,11 @@ func (m *MessagePack) UnPack(binaryMessage []byte) (Imessage, error) {
 
 func (m *MessagePack) ReadUnPackLen(buffer io.Reader) (Imessage, error) {
 	var totalL uint32
+
+	// var l [4]byte
+	// if n,err := io.ReadFull(buffer, l[:]); n<1 || err != nil {
+	// 	return nil,err
+	// }
 	if err := binary.Read(buffer, binary.BigEndian, &totalL); err != nil {
 		return nil, err
 	}
@@ -127,7 +137,6 @@ func (m *MessagePack) ReadUnPackLen(buffer io.Reader) (Imessage, error) {
 }
 
 func (m *MessagePack) ReadUnPack(buffer io.Reader) (Imessage, error) {
-
 	message := &Message{
 	}
 
@@ -186,12 +195,24 @@ func (m *MessagePack) ReadUnPack(buffer io.Reader) (Imessage, error) {
 		return nil, err
 	}
 
-	// 读取信息
 	data := make([]byte, dataL)
-	if l, err := io.ReadFull(buffer, data); l != int(dataL) || err != nil {
-		return nil, fmt.Errorf("read len 0 or %w", err)
+
+	if message.GetCompressType() == None {
+		// 读取信息
+		if l, err := io.ReadFull(buffer, data); l != int(dataL) || err != nil {
+			return nil, fmt.Errorf("read len 0 or %w", err)
+		}
+		message.data = data
+	} else if message.GetCompressType() == Gzip {
+		// 读取信息 // todo 处理消息解压
+		if l, err := io.ReadFull(buffer, data); l != int(dataL) || err != nil {
+			return nil, fmt.Errorf("read len 0 or %w", err)
+		}
+		message.data = data
+	} else {
+		return nil, errors.New(fmt.Sprintf("compressType error %v", message.GetCompressType()))
 	}
-	message.data = data
+
 	return message, nil
 }
 

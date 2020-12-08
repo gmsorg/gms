@@ -146,8 +146,6 @@ func (s *server) GetRouter(handlerName string) (gmsContext.Controller, error) {
 /*
 处理方法
 */
-// func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error) {
-// func (s *server) HandlerMessage(message protocol.Imessage) (gmsContext.Context, error) {
 func (s *server) HandlerMessage(message protocol.Imessage) (*gmsContext.Context, error) {
 	// log.Println(string(message.GetExt()))
 	controller, err := s.GetRouter(message.GetServiceFunc())

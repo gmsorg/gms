@@ -28,7 +28,6 @@ func Addition(c *gmsContext.Context) error {
 	additionRes.Result = additionReq.NumberA + additionReq.NumberB
 
 	// fmt.Println(additionRes.Result)
-
 	// 返回结果
 	c.Result(additionRes)
 	return nil
