@@ -37,7 +37,7 @@ func main() {
 	// 设置 Msgpack 序列化器，默认也是 Msgpack
 	additionClient.SetSerializeType(serialize.Msgpack)
 
-	cs, t := 100, 100
+	cs, t := 100, 400
 	var callt, callOldt time.Duration
 	{
 		start := time.Now()
@@ -74,7 +74,9 @@ func call(additionClient client.IClient, cs, t int) {
 					log.Println(err)
 				}
 				// log.Println(fmt.Sprintf("call %v-%v : %d+%d=%d  right:%v", i, j, req.NumberA, req.NumberB, res.Result, res.Result == req.NumberA+req.NumberB))
-				// log.Println(fmt.Sprintf(" right:%v", res.Result == req.NumberA+req.NumberB))
+				if j%200 == 0 {
+					log.Println(fmt.Sprintf("i:%v j:%v right:%v", i, j, res.Result == req.NumberA+req.NumberB))
+				}
 			}
 			waitGroup.Done()
 		}(i)

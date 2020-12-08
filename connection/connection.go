@@ -3,6 +3,7 @@ package connection
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -16,7 +17,7 @@ import (
 const ReaderBuffsize = 16 * 1024
 
 type Connection struct {
-	connId          int
+	connId      int
 	conn        net.Conn
 	messagePack protocol.IMessagePack
 	seq         uint64
@@ -178,6 +179,7 @@ func (c *Connection) do(reqData []byte) (chan protocol.Imessage, error) {
 读取返回信息
 */
 func (c *Connection) read() {
+	fmt.Println("connId:", c.connId)
 	var err error
 	for err == nil {
 		mp := protocol.NewMessagePack()
