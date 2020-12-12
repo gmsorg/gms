@@ -3,10 +3,10 @@ package connection
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gmsorg/gms/common"
@@ -22,8 +22,23 @@ type Connection struct {
 	messagePack protocol.IMessagePack
 	seq         uint64
 	reader      *bufio.Reader
-	wait        map[uint64]chan protocol.Imessage
-	rw          sync.RWMutex
+	waitM       common.Map
+
+	// rw    sync.RWMutex
+}
+type callCmd struct {
+	start int64
+	cost  time.Duration
+	// sess           *session
+	// output         Message
+	result interface{}
+	// stat           *Status
+	// inputMeta      *utils.Args
+	// swap           goutil.Map
+	mu             sync.Mutex
+	callCmdChan    chan<- callCmd // Send itself to the public channel when call is complete.
+	doneChan       chan struct{}  // Strobes when call is complete.
+	inputBodyCodec byte
 }
 
 // type Wait struct {
@@ -40,7 +55,8 @@ func NewConnection(address string) IConnection {
 	c := &Connection{
 		conn:        conn,
 		messagePack: protocol.NewMessagePack(),
-		wait:        make(map[uint64]chan protocol.Imessage, 10),
+		// wait:        make(map[uint64]chan protocol.Imessage, 10),
+		waitM: common.NewAtomicMap(),
 	}
 
 	c.reader = bufio.NewReaderSize(conn, ReaderBuffsize)
@@ -53,133 +69,73 @@ func (c *Connection) SetConnId(connId int) {
 	c.connId = connId
 }
 
-func (c *Connection) SendM(message protocol.Imessage, response interface{}) error {
+func (c *Connection) Send(message protocol.Imessage, response interface{}) error {
 
 	if c.conn == nil {
 		return errors.New("[Connection.Send] conn not exist")
 	}
 
-	wait, err := c.doM(message)
+	wait, err := c.AsyncSend(message, response)
 
 	if err != nil {
 		return err
 	}
 
-	select {
-	case m := <-wait:
-		res := serialize.GetSerialize(m.GetSerializeType())
-		// 返序列化返回结果 成response
-		res.UnSerialize(m.GetData(), response)
-	}
+	<-wait.doneChan
+
 	return nil
 }
 
-func (c *Connection) doM(message protocol.Imessage) (chan protocol.Imessage, error) {
+func (c *Connection) AsyncSend(message protocol.Imessage, response interface{}) (*callCmd, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("[Connection.Send]recover send data error:%v", err)
 		}
 	}()
 
-	c.rw.Lock()
-	defer c.rw.Unlock()
+	cc := &callCmd{
+		start:  0,
+		cost:   0,
+		result: response,
+		// callCmdChan:    nil,
+		doneChan: make(chan struct{}),
+		// inputBodyCodec: 0,
+	}
 
-	seq := c.seq
-	c.seq++
+	cc.mu.Lock()
+	defer cc.mu.Unlock()
+
+	seq := atomic.AddUint64(&c.seq, 1)
 	message.SetSeq(seq)
 
-	wait := make(chan protocol.Imessage)
-	// fmt.Println("获取写锁")
-
-	// fmt.Println("获取写锁成功")
-	c.wait[seq] = wait
-	// fmt.Println("set seq:", seq)
-	// fmt.Println("释放写锁成功")
+	c.waitM.Store(seq, cc)
+	// c.rw.Unlock()
 
 	// 打包消息
 	eb, err := c.messagePack.Pack(message, true)
 	if err != nil {
-		delete(c.wait, seq)
+		// c.rw.Lock()
+		// delete(c.waitM, seq)
+		c.waitM.Delete(seq)
+		// c.rw.Unlock()
 		// 错误处理
 		log.Println(err)
 	}
 
+	// c.rw.Lock()
+	// defer c.rw.Unlock()
 	_, err = c.conn.Write(eb)
 	if err != nil {
 		return nil, err
 	}
-	return wait, nil
+	return cc, nil
 }
-
-func (c *Connection) Send(reqData []byte, response interface{}) error {
-	// c.rw.Lock()
-	// defer c.rw.Unlock()
-
-	wait, err := c.do(reqData)
-	if err != nil {
-		return err
-	}
-
-	select {
-	case m := <-wait:
-		res := serialize.GetSerialize(m.GetSerializeType())
-		// 返序列化返回结果 成response
-		res.UnSerialize(m.GetData(), response)
-	}
-	return nil
-}
-
-func (c *Connection) GetSeq() uint64 {
-	return c.seq
-}
-
-func (c *Connection) do(reqData []byte) (chan protocol.Imessage, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println("[Connection.Send]recover send data error:%v", err)
-		}
-	}()
-
-	seq := c.seq
-	c.seq++
-	wait := make(chan protocol.Imessage)
-
-	// fmt.Println("获取写锁")
-	c.rw.Lock()
-	// fmt.Println("获取写锁成功")
-	c.wait[seq] = wait
-	// fmt.Println("set seq:", seq)
-	c.rw.Unlock()
-	// fmt.Println("释放写锁成功")
-
-	if c.conn == nil {
-		return nil, errors.New("[Connection.Send] conn not exist")
-	}
-	_, err := c.conn.Write(reqData)
-	if err != nil {
-		return nil, err
-	}
-	return wait, nil
-}
-
-// func (c *Connection) Read() (protocol.Imessage, error) {
-// 	if c.conn == nil {
-// 		return nil, errors.New("[Read] conn not exist")
-// 	}
-//
-// 	message, err := c.messagePack.ReadUnPackLen(c.conn)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("Read %w", err)
-// 	}
-//
-// 	return message, nil
-// }
 
 /**
 读取返回信息
 */
 func (c *Connection) read() {
-	fmt.Println("connId:", c.connId)
+
 	var err error
 	for err == nil {
 		mp := protocol.NewMessagePack()
@@ -188,22 +144,25 @@ func (c *Connection) read() {
 			break
 		}
 
-		// fmt.Println("get seq:", message.GetSeq())
-		//
-		// fmt.Println("获取读锁")
+		seq := message.GetSeq()
+		wait, ok := c.waitM.Load(seq)
+		c.waitM.Delete(seq)
 
-		c.rw.RLock()
-		wait, ok := c.wait[message.GetSeq()]
-		delete(c.wait, message.GetSeq())
-		c.rw.RUnlock()
+		if ok && wait != nil {
+			switch w := wait.(type) {
+			case *callCmd:
 
-		// fmt.Println("获取读锁2")
+				serialize := serialize.GetSerialize(message.GetSerializeType())
+				// 返序列化返回结果 成response
+				if err := serialize.UnSerialize(message.GetData(), w.result); err != nil {
+					log.Println(err)
+					break
+				}
 
-		if ok {
-			if wait == nil {
-				break
+				w.doneChan <- struct{}{}
+
 			}
-			wait <- message
+
 		}
 	}
 }

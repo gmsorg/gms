@@ -84,7 +84,7 @@ func (c *Client) Call(serviceFunc string, request interface{}, response interfac
 
 	// 发送打包好的消息
 	// err = connection.Send(eb, response)
-	err = connection.SendM(message, response)
+	err = connection.Send(message, response)
 
 	if err != nil {
 		log.Println("call-error:", err)
