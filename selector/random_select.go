@@ -33,6 +33,10 @@ func (r *RandomSelect) Select() (string, error) {
 		return "", errors.New("no server")
 	}
 
+	if size == 1 {
+		return servers[0], nil
+	}
+
 	i := fastrand.Uint32n(uint32(len(servers)))
 	return servers[i], nil
 }
