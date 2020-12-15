@@ -2,9 +2,9 @@ package selector
 
 import (
 	"errors"
-	"math/rand"
 	"sync"
-	"time"
+
+	"github.com/valyala/fastrand"
 
 	"github.com/gmsorg/gms/connection"
 	"github.com/gmsorg/gms/discovery"
@@ -33,8 +33,8 @@ func (r *RandomSelect) Select() (string, error) {
 		return "", errors.New("no server")
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	return servers[rand.Intn(size)], nil
+	i := fastrand.Uint32n(uint32(len(servers)))
+	return servers[i], nil
 }
 
 func (r *RandomSelect) SelectConn() (connection.IConnection, error) {
