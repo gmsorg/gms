@@ -19,6 +19,25 @@ import (
 客户端
 */
 func main() {
+	// cpuf, err := os.Create("cpu_profile")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// pprof.StartCPUProfile(cpuf)
+	// defer pprof.StopCPUProfile()
+	//
+	// fm, err := os.OpenFile("mem.out", os.O_RDWR|os.O_CREATE, 0644)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// pprof.WriteHeapProfile(fm)
+	// fm.Close()
+
+	// profile.Start(profile.CPUProfile,profile.ProfilePath(".")).Stop()
+	// profile.Start(profile.MemProfile, profile.ProfilePath("."), profile.NoShutdownHook)
+
+	// p := profile.Start(profile.MemProfileAllocs, profile.ProfilePath("."), profile.NoShutdownHook)
+
 	if err := agent.Listen(agent.Options{}); err != nil {
 		log.Fatal(err)
 	}
@@ -37,7 +56,7 @@ func main() {
 	// 设置 Msgpack 序列化器，默认也是 Msgpack
 	additionClient.SetSerializeType(serialize.Msgpack)
 
-	cs, t := 100, 400
+	cs, t := 100, 100
 	var callt, callOldt time.Duration
 	{
 		start := time.Now()
@@ -63,7 +82,7 @@ func call(additionClient client.IClient, cs, t int) {
 				// fmt.Println("启动：", i, "-", j)
 				rand.Seed(time.Now().UnixNano())
 				// req := &model.AdditionReq{NumberA: 100, NumberB: 200}
-				req := &model.AdditionReq{NumberA: rand.Intn(100), NumberB: rand.Intn(200)}
+				req := &model.AdditionReq{NumberA: rand.Intn(100000), NumberB: rand.Intn(100000)}
 
 				// 接收返回值的对象
 				res := &model.AdditionRes{}
@@ -74,7 +93,7 @@ func call(additionClient client.IClient, cs, t int) {
 					log.Println(err)
 				}
 				// log.Println(fmt.Sprintf("call %v-%v : %d+%d=%d  right:%v", i, j, req.NumberA, req.NumberB, res.Result, res.Result == req.NumberA+req.NumberB))
-				if j%200 == 0 {
+				if j%10 == 0 && i%10 == 0 {
 					log.Println(fmt.Sprintf("i:%v j:%v right:%v", i, j, res.Result == req.NumberA+req.NumberB))
 				}
 			}

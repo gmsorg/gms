@@ -2,10 +2,9 @@ package selector
 
 import (
 	"errors"
-	"fmt"
-	"math/rand"
 	"sync"
-	"time"
+
+	"github.com/valyala/fastrand"
 
 	"github.com/gmsorg/gms/connection"
 	"github.com/gmsorg/gms/discovery"
@@ -34,8 +33,12 @@ func (r *RandomSelect) Select() (string, error) {
 		return "", errors.New("no server")
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	return servers[rand.Intn(size)], nil
+	if size == 1 {
+		return servers[0], nil
+	}
+
+	i := fastrand.Uint32n(uint32(len(servers)))
+	return servers[i], nil
 }
 
 func (r *RandomSelect) SelectConn() (connection.IConnection, error) {
@@ -51,21 +54,22 @@ func (r *RandomSelect) SelectConn() (connection.IConnection, error) {
 	r.rw.Lock()
 	defer r.rw.Unlock()
 
-	rand.Seed(time.Now().UnixNano())
-	address := servers[rand.Intn(size)]
+	// rand.Seed(time.Now().UnixNano())
+	// address := servers[rand.Intn(size)]
+	address := servers[0]
 
-	connId := rand.Intn(10)
-	key := fmt.Sprintf("%v-%v", connId, address)
+	// connId := rand.Intn(1)
+	// key := fmt.Sprintf("%v-%v", connId, address)
 	// key := address
 
-	if gmsConn, ok := r.connection[key]; ok {
+	if gmsConn, ok := r.connection[address]; ok {
 		// fmt.Println("get ok", ok)
 		return gmsConn, nil
 	}
 
 	gmsConn := connection.NewConnection(address)
-	gmsConn.SetConnId(connId)
-	r.connection[key] = gmsConn
+	// gmsConn.SetConnId(connId)
+	r.connection[address] = gmsConn
 
 	return gmsConn, err
 }

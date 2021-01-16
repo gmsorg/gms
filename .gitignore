@@ -2,3 +2,5 @@ rpcx-demo
 .idea
 temp
 main.go
+cpu_profile
+mem.out
