@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"os"
-	"runtime/pprof"
 	"sync"
 	"time"
 
@@ -21,19 +19,19 @@ import (
 客户端
 */
 func main() {
-	cpuf, err := os.Create("cpu_profile")
-	if err != nil {
-		log.Fatal(err)
-	}
-	pprof.StartCPUProfile(cpuf)
-	defer pprof.StopCPUProfile()
-
-	fm, err := os.OpenFile("mem.out", os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	pprof.WriteHeapProfile(fm)
-	fm.Close()
+	// cpuf, err := os.Create("cpu_profile")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// pprof.StartCPUProfile(cpuf)
+	// defer pprof.StopCPUProfile()
+	//
+	// fm, err := os.OpenFile("mem.out", os.O_RDWR|os.O_CREATE, 0644)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// pprof.WriteHeapProfile(fm)
+	// fm.Close()
 
 	// profile.Start(profile.CPUProfile,profile.ProfilePath(".")).Stop()
 	// profile.Start(profile.MemProfile, profile.ProfilePath("."), profile.NoShutdownHook)
